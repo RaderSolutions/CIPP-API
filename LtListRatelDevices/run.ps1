@@ -12,6 +12,7 @@ Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:Lt
 $requestJson = $Request | convertto-json
 $TenantFilter = $Request.Query.TenantFilter
 $cwaClientId = Get-LabtechClientId($TenantFilter)
+write-host $cwaClientId
 
 if($Request.Query.DeviceID){
     $deviceId=$Request.Query.DeviceID

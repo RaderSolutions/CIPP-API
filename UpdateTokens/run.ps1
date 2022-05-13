@@ -8,7 +8,9 @@ $Refreshtoken = (Get-GraphToken -ReturnRefresh $true).Refresh_token
 $ExchangeRefreshtoken = (Get-GraphToken -AppID 'a0c73c16-a7e3-4564-9a95-2bdf47383716' -refreshtoken $ENV:ExchangeRefreshtoken -ReturnRefresh $true).Refresh_token
 
 $ResourceGroup = $ENV:Website_Resource_Group
-$Subscription = ($ENV:WEBSITE_OWNER_NAME).split('+') | Select-Object -First 1
+$Subscription = ($ENV:WEBSITE_OWNER_NAME).split('+') | Select-Object -First 1\
+write-host $Subscription
+write-host $ResourceGroup
 if ($env:MSI_SECRET) {
     Disable-AzContextAutosave -Scope Process | Out-Null
     $AzSession = Connect-AzAccount -Identity -Subscription $Subscription
