@@ -8,4 +8,7 @@
     'Az.Keyvault'  = '3.*'
     'Az.functions' = '3.*'
     'SimplySql'    = '1.6.2'
+    'Az.Resources' = '5.*'
+    'Az.Storage'   = '4.*'
+    'AzTable'      = '2.*'
 }
