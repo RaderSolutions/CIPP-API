@@ -90,7 +90,7 @@ $table = Invoke-SqlQuery -Query "SELECT
 
 " -AsDataTable 
 }
-$devices= $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors | convertto-json
+$devices= $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors
 Close-SqlConnection
 
 $deviceArray = @()
