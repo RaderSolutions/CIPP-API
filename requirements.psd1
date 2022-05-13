@@ -7,4 +7,5 @@
     'Az.accounts'  = '2.*'
     'Az.Keyvault'  = '3.*'
     'Az.functions' = '3.*'
+    'SimplySql'    = '1.6.2'
 }
