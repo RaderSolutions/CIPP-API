@@ -90,13 +90,23 @@ $table = Invoke-SqlQuery -Query "SELECT
 
 " -AsDataTable 
 }
-$response = $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors | convertto-json
+$devices= $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors | convertto-json
 Close-SqlConnection
+
+$deviceArray = @()
+$result
+
+if($devices.count -eq 1 -and $null -eq $deviceId) { 
+    $deviceArray += $devices
+    $result = $deviceArray
+} else { 
+    $result = $devices | convertto-json
+}
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
-        Body       = $response
+        Body       = $result
     })
 
 
