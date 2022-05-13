@@ -14,11 +14,20 @@ $cwaClientId = Get-LabtechClientId($TenantFilter)
 
 $table = Invoke-SqlQuery -Query "SELECT locationId, Name FROM labtech.locations where ClientID =$cwaClientId and Name not like '=%';" -AsDataTable
 # Associate values to output bindings by calling 'Push-OutputBinding'.
-$response = $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors | convertto-json
+$locations = $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors 
 Close-SqlConnection
+$locationArray = @()
+$result
+
+if($locations.count -eq 1) { 
+    $locationArray += $locations
+    $result = $locationArray
+} else { 
+    $result = $locations | convertto-json
+}
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
-        Body       = $response
+        Body       = $result
     })
