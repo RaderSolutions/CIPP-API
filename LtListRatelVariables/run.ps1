@@ -14,7 +14,7 @@ $cwaClientId = Get-LabtechClientId($TenantFilter)
 if($Request.Query.family -and $Request.Query.key) { 
     $family = $Request.Query.family
     $key = $Request.Query.key
-    $table = Invoke-SqlQuery -Query "SELECT astFamily as 'Family', astKey as 'Key', astValue as 'Value', last_sync as 'LastRead' FROM plugin_rader_ratel_astdb WHERE client_id=$cwaClientId and astFamily =$family and astKey=$key" -AsDataTable
+    $table = Invoke-SqlQuery -Query "SELECT astFamily as 'Family', astKey as 'Key', astValue as 'Value', last_sync as 'LastRead' FROM plugin_rader_ratel_astdb WHERE client_id=$cwaClientId and astFamily ='$family' and astKey='$key'" -AsDataTable
 } else { 
     $table = Invoke-SqlQuery -Query "SELECT astFamily as 'Family', astKey as 'Key', astValue as 'Value', last_sync as 'LastRead' FROM plugin_rader_ratel_astdb WHERE client_id=$cwaClientId" -AsDataTable
 }
