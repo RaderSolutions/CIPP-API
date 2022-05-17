@@ -15,7 +15,7 @@ try {
     Import-Module SimplySql
     Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:LtUser -Password $ENV:LtPass -Port 3306
 
-    $TenantFilter = $deviceobj.TenantFilter
+    $TenantFilter = $deviceobj.tenantID
     write-host $TenantFilter
     $cwaClientId = Get-LabtechClientId($TenantFilter)
     write-host $cwaClientId
@@ -43,7 +43,7 @@ try {
             0,
             '',
             '$($deviceobj.ExtensionNumber)', 
-            '$($deviceobj.LtContactID)', 
+            '$($deviceobj.ContactID)', 
             '$($deviceobj.ProductID)', 
             '$cwaClientId',
             $($deviceobj.LocationID), 
@@ -55,7 +55,7 @@ try {
         email_address = '',
         sip_password = '',
         is_hidden_in_phonebook = 0,
-         contact_id='$($deviceobj.LtContactID)',
+         contact_id='$($deviceobj.ContactID)',
          product_id='$($deviceobj.ProductID)',
          client_id='$cwaClientId',
          location_id='$($deviceobj.LocationID)',
