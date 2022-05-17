@@ -15,7 +15,7 @@ $cwaClientId = Get-LabtechClientId($TenantFilter)
 
 $table = Invoke-SqlQuery -Query "SELECT ContactID, CONCAT(contacts.FirstName,' ',contacts.LastName) as Name FROM labtech.contacts where clientid = $cwaClientId;" -AsDataTable
 # Associate values to output bindings by calling 'Push-OutputBinding'.
-$contacts = $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors | convertto-json
+$contacts = $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors
 Close-SqlConnection
 
 $contactArray = @()
