@@ -25,7 +25,7 @@ Close-SqlConnection
 $variableArray = @()
 $result
 
-if($variables.count -eq 1) { 
+if($variables.count -eq 1 -and $null -eq $family ) { 
     $variableArray += $variables
     $result = $variableArray
 } else { 
