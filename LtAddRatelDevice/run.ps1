@@ -6,7 +6,7 @@ param($Request, $TriggerMetadata)
 # Write to the Azure Functions log stream.
 Write-Host "PowerShell HTTP trigger function processed a request."
 $deviceobj = $Request.body
-$deviceobjJson = $request.body | convertto-json
+$request.body | convertto-json
 $Results = [System.Collections.ArrayList]@()
 # Get Automate Auth Token
 $null = Connect-AzAccount -Identity
