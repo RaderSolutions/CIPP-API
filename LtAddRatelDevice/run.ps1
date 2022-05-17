@@ -16,8 +16,9 @@ try {
     Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:LtUser -Password $ENV:LtPass -Port 3306
 
     $TenantFilter = $deviceobj.TenantFilter
+    write-host $TenantFilter
     $cwaClientId = Get-LabtechClientId($TenantFilter)
-
+    write-host $cwaClientId
     
     if ($deviceobj.DeviceType -eq "User") { 
         # add device to LT database
