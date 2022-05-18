@@ -19,7 +19,7 @@ try {
     write-host $TenantFilter
     $cwaClientId = Get-LabtechClientId($TenantFilter)
     write-host $cwaClientId
-    
+    write-host $deviceobj.DeviceType
     if ($deviceobj.DeviceType -eq "User") { 
         # add device to LT database
         Invoke-SqlQuery -Query "INSERT INTO plugin_rader_ratel_device 
