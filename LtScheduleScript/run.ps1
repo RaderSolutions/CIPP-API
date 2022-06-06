@@ -84,7 +84,9 @@ write-host $scriptBody
 
 $scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | ConvertTo-Json
 $body = @{"Results" = $scriptResult }
+$result = @()
+$result += $body
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
     StatusCode = [HttpStatusCode]::OK
-    Body       = $body
+    Body       = $result    
 })
