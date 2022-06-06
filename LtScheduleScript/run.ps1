@@ -82,7 +82,7 @@ if($parameters){
 
 write-host $scriptBody
 
-$scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | ConvertTo-Json
+$scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | convertto-json | out-string
 $body = @{"Results" = $scriptResult }
 $json = @{}
 $json.Add("Data",$body)
