@@ -12,9 +12,14 @@ $requestJson = $Request | convertto-json
 $TenantFilter = $Request.Query.TenantFilter
 $cwaClientId = Get-LabtechClientId($TenantFilter)
 
-
-$table = Invoke-SqlQuery -Query "SELECT ContactID, CONCAT(contacts.FirstName,' ',contacts.LastName) as Name FROM labtech.contacts where clientid = $cwaClientId;" -AsDataTable
-# Associate values to output bindings by calling 'Push-OutputBinding'.
+if($Request.Query.ContactId) { 
+    $contactId = $Request.Query.ContactId
+    $table = Invoke-SqlQuery - Query "SELECT `Enable Password Complexity` as 'PasswordComplexityEnabled',firstname, lastname, Email, RaderPasswordExpiration, MSN, raderPassword,CONVERT(AES_DECRYPT(raderPassword,SHA(CONCAT(' ',$cwaClientId + 1))) USING utf8) as 'RaderPass' FROM labtech.contacts c left join labtech.v_extradataclients ed on c.ClientID = ed.ClientID where contactID = $contactId;" -AsDataTable
+}
+else {
+    $table = Invoke-SqlQuery -Query "SELECT ContactID, CONCAT(contacts.FirstName,' ',contacts.LastName) as Name FROM labtech.contacts where clientid = $cwaClientId;" -AsDataTable
+}
+    # Associate values to output bindings by calling 'Push-OutputBinding'.
 $contacts = $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors
 Close-SqlConnection
 
