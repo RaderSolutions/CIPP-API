@@ -11,7 +11,6 @@ Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:Lt
 $requestJson = $Request | convertto-json
 $TenantFilter = $Request.Query.TenantFilter
 $cwaClientId = Get-LabtechClientId($TenantFilter)
-
 if($Request.Query.ContactId) { 
     $contactId = $Request.Query.ContactId
     $table = Invoke-SqlQuery - Query "SELECT `Enable Password Complexity` as 'PasswordComplexityEnabled',firstname, lastname, Email, RaderPasswordExpiration, MSN, raderPassword,CONVERT(AES_DECRYPT(raderPassword,SHA(CONCAT(' ',$cwaClientId + 1))) USING utf8) as 'RaderPass' FROM labtech.contacts c left join labtech.v_extradataclients ed on c.ClientID = ed.ClientID where contactID = $contactId;" -AsDataTable
