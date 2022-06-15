@@ -15,7 +15,8 @@ if($Request.Query.ContactId) {
     $contactId = $Request.Query.ContactId
     $queryPartOne = 'SELECT `Enable Password Complexity`'
     $queryPartTwo = "as 'PasswordComplexityEnabled',firstname, lastname, Email, RaderPasswordExpiration, MSN, raderPassword,CONVERT(AES_DECRYPT(raderPassword,SHA(CONCAT(' ',$cwaClientId + 1))) USING utf8) as 'RaderPass' FROM labtech.contacts c left join labtech.v_extradataclients ed on c.ClientID = ed.ClientID where contactID = $contactId;" 
-    $table = Invoke-SqlQuery - Query $queryPartOne$queryPartTwo -AsDataTable
+    write-host $queryPartOne$queryPartTwo
+    $table = Invoke-SqlQuery -Query $queryPartOne$queryPartTwo -AsDataTable
 }
 else {
     $table = Invoke-SqlQuery -Query "SELECT ContactID, CONCAT(contacts.FirstName,' ',contacts.LastName) as Name FROM labtech.contacts where clientid = $cwaClientId;" -AsDataTable
