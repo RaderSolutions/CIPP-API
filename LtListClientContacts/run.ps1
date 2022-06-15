@@ -13,6 +13,7 @@ $TenantFilter = $Request.Query.TenantFilter
 $cwaClientId = Get-LabtechClientId($TenantFilter)
 if($Request.Query.ContactId) { 
     $contactId = $Request.Query.ContactId
+    write-output "SELECT `Enable Password Complexity` as 'PasswordComplexityEnabled',firstname, lastname, Email, RaderPasswordExpiration, MSN, raderPassword,CONVERT(AES_DECRYPT(raderPassword,SHA(CONCAT(' ',$cwaClientId + 1))) USING utf8) as 'RaderPass' FROM labtech.contacts c left join labtech.v_extradataclients ed on c.ClientID = ed.ClientID where contactID = $contactId;" 
     $table = Invoke-SqlQuery - Query "SELECT `Enable Password Complexity` as 'PasswordComplexityEnabled',firstname, lastname, Email, RaderPasswordExpiration, MSN, raderPassword,CONVERT(AES_DECRYPT(raderPassword,SHA(CONCAT(' ',$cwaClientId + 1))) USING utf8) as 'RaderPass' FROM labtech.contacts c left join labtech.v_extradataclients ed on c.ClientID = ed.ClientID where contactID = $contactId;" -AsDataTable
 }
 else {
