@@ -185,6 +185,31 @@ Function Get-CronNextExecutionTime {
  
     Return $Date
 }
+
+$context = New-AzStorageContext -ConnectionString $ENV:AzureWebJobsStorage
+$tablename = 'CippLogs'
+try { 
+    $StorageTable = Get-AzStorageTable –Context $context -Name $tablename -ErrorAction Stop
+}
+catch {
+    New-AzStorageTable -Context $context -Name $tablename | Out-Null
+    $StorageTable = Get-AzStorageTable –Context $context -Name $tablename
+}
+$Table = $StorageTable.CloudTable
+$PartitionKey = Get-Date -UFormat '%Y%m%d'
+$Rows = Get-AzTableRow -Table $table -PartitionKey $PartitionKey -Top 10 -SelectColumn Tenant, Message
+$SlimRows = New-Object System.Collections.ArrayList
+foreach ($Row in $Rows) {
+    $SlimRows.Add(@{
+        Tenant = $Row.Tenant
+        Message = $Row.Message
+    })
+}
+$Alerts = [System.Collections.ArrayList]@()
+if ($ENV:ApplicationID -eq "LongApplicationID" -or $null -eq $ENV:ApplicationID) { $Alerts.add("You have not yet setup your SAM Setup. Please go to the SAM Wizard in settings to finish setup") }
+if ($ENV:FUNCTIONS_EXTENSION_VERSION -ne "~4") { $Alerts.add("Your Function App is running on a Runtime version lower than 4. This impacts performance. Go to Settings -> Backend -> Function App Configuration -> Function Runtime Settings and set this to 4 for maximum performance") }
+if ($psversiontable.psversion.toString() -lt 7.2) { $Alerts.add("Your Function App is running on Powershell 7. This impacts performance. Go to Settings -> Backend -> Function App Configuration -> General Settings and set PowerShell Core Version to 7.2 for maximum performance") }
+
 $APIName = $TriggerMetadata.FunctionName
 Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Accessed this API" -Sev "Debug"
 $dash = [PSCustomObject]@{
@@ -195,10 +220,11 @@ $dash = [PSCustomObject]@{
     tenantCount       = [int64](Get-Content '.\tenants.cache.json' | ConvertFrom-Json -ErrorAction SilentlyContinue).count
     RefreshTokenDate  = (Get-CronNextExecutionTime -Expression '0 0 * * 0').AddDays('-7').tostring('s') -split "T" | Select-Object -First 1
     ExchangeTokenDate = (Get-CronNextExecutionTime -Expression '0 0 * * 0').AddDays('-7').tostring('s') -split "T" | Select-Object -First 1
-    LastLog           = @(Get-Content "Logs\$((Get-Date).ToString('ddMMyyyy')).log" | ConvertFrom-Csv -Header "DateTime", "Tenant", "API", "Message", "User", "Severity" -Delimiter "|" | Select-Object -Last 10)
+    LastLog           = @($SlimRows)
+    Alerts            = @($Alerts)
 }
 # Write to the Azure Functions log stream.
-
+ 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK

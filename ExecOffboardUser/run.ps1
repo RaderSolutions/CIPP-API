@@ -23,7 +23,7 @@ $results = switch ($request.body) {
 
         }
         catch {
-            "Failed. $($_.Exception.Message)" 
+            "Revoke Session Failed: $($_.Exception.Message)" 
         }
     }
     { $_.ResetPass -eq 'true' } { 
@@ -56,7 +56,7 @@ $results = switch ($request.body) {
             catch {
                 Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Could not remove $($username) from group $group" -Sev "Error" -tenant $TenantFilter
 
-                "Could not remove user from group $group"
+                "Could not remove user from group$($group): $($_.Exception.Message)"
             }
             
         }
@@ -120,7 +120,7 @@ $results = switch ($request.body) {
 
         }
         catch {
-            Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Could not add new owner to Onedrive $($request.body.AccessAutomap) on $($username)" -Sev "Error" -tenant $TenantFilter
+            Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME -message "Could not add new owner to Onedrive $($request.body.AccessAutomap) on $($username)" -Sev "Error" -tenant $TenantFilter
 
             "Could not add owner to Onedrive for $($username). Error: $($_.Exception.Message)"
         }
@@ -135,12 +135,12 @@ $results = switch ($request.body) {
         catch {
             Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Could not add mailbox permissions for $($request.body.AccessAutomap) on $($username)" -Sev "Error" -tenant $TenantFilter
 
-            "Could not add shared mailbox permissions for $($username). Error: $($_.Exception.Message)"
+            "Could not add shared mailbox permissions with no auto-mapping for $($username). Error: $($_.Exception.Message)"
         }
     }
     { $_."AccessAutomap" -ne "" } { 
         try {
-            $permissions = New-ExoRequest -tenantid $TenantFilter -cmdlet "Add-MailboxPermission" -cmdParams @{Identity = $userid; user = $Request.body.AccessNoAutomap; automapping = $true; accessRights = @("FullAccess"); InheritanceType = "all" }
+            $permissions = New-ExoRequest -tenantid $TenantFilter -cmdlet "Add-MailboxPermission" -cmdParams @{Identity = $userid; user = $Request.body.AccessAutomap; automapping = $true; accessRights = @("FullAccess"); InheritanceType = "all" }
             "added $($Request.body.AccessAutomap) to $($username) Shared Mailbox with automapping"
             Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Gave full permissions to $($request.body.AccessAutomap) on $($username)" -Sev "Info" -tenant $TenantFilter
 
@@ -148,7 +148,7 @@ $results = switch ($request.body) {
         catch {
             Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Could not add mailbox permissions for $($request.body.AccessAutomap) on $($username)" -Sev "Error" -tenant $TenantFilter
 
-            "Could not add shared mailbox permissions for $($username). Error: $($_.Exception.Message)"
+            "Could not add shared mailbox permissions with automapping for $($username). Error: $($_.Exception.Message)"
         }
     }
     
@@ -205,6 +205,50 @@ $results = switch ($request.body) {
         catch {
             Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Could not delete $($username)" -Sev "Error" -tenant $TenantFilter
             "Could not delete $($username). Error: $($_.Exception.Message)"
+        }
+    }
+
+    { $_."RemoveRules" -eq 'true' } {
+        try {
+            $rules = New-ExoRequest -tenantid $TenantFilter -cmdlet "Get-InboxRule" -cmdParams @{Identity = $userid } | ForEach-Object {
+                try {
+                    New-ExoRequest -tenantid $TenantFilter -cmdlet "Remove-InboxRule" -cmdParams @{Identity = $_.Identity }
+                    "Removed rule: $($_.Name)"
+                }
+                catch {
+                    "Could not remove rule: $($_.Name)"
+                    continue
+                }
+            }
+           
+            Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Deleted Rules for $($username)" -Sev "Info" -tenant $TenantFilter
+
+        }
+        catch {
+            Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Could not delete rules for $($username): $($_.Exception.Message)" -Sev "Error" -tenant $TenantFilter
+            "Could not delete rules for $($username). Error: $($_.Exception.Message)"
+        }
+    }
+
+    { $_."RemoveMobile" -eq 'true' } {
+        try {
+            $devices = New-ExoRequest -tenantid $TenantFilter -cmdlet "Get-MobileDevice" -cmdParams @{mailbox = $userid } | ForEach-Object {
+                try {
+                    New-ExoRequest -tenantid $TenantFilter -cmdlet "Remove-MobileDevice" -cmdParams @{Identity = $_.Identity }
+                    "Removed device: $($_.FriendlyName)"
+                }
+                catch {
+                    "Could not remove device: $($_.FriendlyName)"
+                    continue
+                }
+            }
+           
+            Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Deleted mobile devices for $($username)" -Sev "Info" -tenant $TenantFilter
+
+        }
+        catch {
+            Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Could not delete mobile devices for $($username): $($_.Exception.Message)" -Sev "Error" -tenant $TenantFilter
+            "Could not delete mobile devices for $($username). Error: $($_.Exception.Message)"
         }
     }
     

@@ -10,12 +10,11 @@ try {
 catch {
     Log-request -API "BestPracticeAnalyser" -tenant $tenant -message "Unable to Retrieve token for Best Practice Analyser $($tenant) Error: $($_.exception.message)" -sev "Error"
 }
-$upn = "notRequired@required.com"
-
+$TenantName = Get-Tenants | Where-Object -Property DefaultDomainName -EQ $tenant
 # Build up the result object that will be passed back to the durable function
 $Result = [PSCustomObject]@{
-    Tenant                           = $tenant
-    GUID                             = $($Tenant.Replace('.', ''))
+    Tenant                           = $TenantName.displayname
+    GUID                             = $TenantName.CustomerId
     LastRefresh                      = $(Get-Date (Get-Date).ToUniversalTime() -UFormat '+%Y-%m-%dT%H:%M:%S.000Z')
     SecureDefaultState               = ""
     PrivacyEnabled                   = ""
@@ -209,7 +208,7 @@ try {
     $LicenseUsage = New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/subscribedSkus' -tenantid $Tenant
     # Import the licenses conversion table
     $ConvertTable = Import-Csv Conversiontable.csv | Sort-Object -Property 'guid' -Unique
-    $ExcludeList = Get-Content '.\Config\ExcludeSkuList.json' | ConvertFrom-Json
+    $ExcludeList = Get-AzTableRow -Table (Get-CIPPTable -TableName ExcludedLicenses)
     $UnusedLicenses = $LicenseUsage | Where-Object { ($_.prepaidUnits.enabled -ne $_.consumedUnits) -and ($_.SkuID -notin $ExcludeList.GUID) }
     $UnusedLicensesCount = $UnusedLicenses | Measure-Object | Select-Object -ExpandProperty Count
     $UnusedLicensesResult = if ($UnusedLicensesCount -gt 0) { "FAIL" } else { "PASS" }

@@ -10,12 +10,33 @@ Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME  -messa
 # Write to the Azure Functions log stream.
 Write-Host "PowerShell HTTP trigger function processed a request."
 $results = try { 
-    $Request.body | ConvertTo-Json | Set-Content ".\Config\Config_Notifications.Json"
-    Set-Content '.\Cache_Scheduler\_DefaultNotifications.json' -Value '{ "tenant": "any","Type": "CIPPNotifications" }'
+    $Table = Get-CIPPTable -TableName SchedulerConfig
+    $SchedulerConfig = @{
+        'tenant'             = 'Any'
+        'tenantid'           = 'TenantId'
+        'type'               = 'CIPPNotifications'
+        'schedule'           = "Every 15 minutes"
+        'email'              = "$($Request.Body.Email)"
+        'webhook'            = "$($Request.Body.Webhook)"
+        "removeStandard"     = [boolean]$Request.Body.removeStandard
+        "addStandardsDeploy" = [boolean]$Request.Body.addStandardsDeploy
+        "tokenUpdater"       = [boolean]$Request.Body.tokenUpdater
+        "addPolicy"          = [boolean]$Request.Body.addPolicy
+        "removeUser"         = [boolean]$Request.Body.removeUser
+        "addUser"            = [boolean]$Request.Body.addUser
+        "addChocoApp"        = [boolean]$Request.Body.addChocoApp
+    }
+    $TableRow = @{
+        table        = $Table
+        partitionKey = 'CippNotifications'
+        rowKey       = "CippNotifications"
+        property     = $SchedulerConfig
+    }
+    Add-AzTableRow @TableRow -UpdateExisting | Out-Null
     "succesfully set the configuration"
 }
 catch {
-    "Failed to set configuration"
+    "Failed to set configuration: $($_.Exception.message)"
 }
 
 

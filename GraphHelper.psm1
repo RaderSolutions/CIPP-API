@@ -1,3 +1,18 @@
+function Get-CIPPTable {
+    [CmdletBinding()]
+    param (
+        $tablename = 'CippLogs'
+    )
+    $context = New-AzStorageContext -ConnectionString $ENV:AzureWebJobsStorage
+    try { 
+        $StorageTable = Get-AzStorageTable -Context $context -Name $tablename -ErrorAction Stop
+    }
+    catch {
+        New-AzStorageTable -Context $context -Name $tablename | Out-Null
+        $StorageTable = Get-AzStorageTable -Context $context -Name $tablename
+    }
+    return $StorageTable.CloudTable
+}
 function Get-NormalizedError {
     [CmdletBinding()]
     param (
@@ -49,23 +64,33 @@ function Get-GraphToken($tenantid, $scope, $AsApp, $AppID, $refreshToken, $Retur
     return $header
 }
 
-function Log-Request ($message, $tenant, $API, $user, $sev) {
+function Log-Request ($message, $tenant = "None", $API = "None", $user, $sev) {
     $username = ([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($user)) | ConvertFrom-Json).userDetails
-    New-Item -Path 'Logs' -ItemType Directory -ErrorAction SilentlyContinue
-    $date = (Get-Date).ToString('s')
-    $LogMutex = New-Object System.Threading.Mutex($false, 'LogMutex')
+
+    $Table = Get-CIPPTable
+    if (!$tenant) { $tenant = "None" }
     if (!$username) { $username = 'CIPP' }
-    if (!$tenant) { $tenant = 'None' }
     if ($sev -eq 'Debug' -and $env:DebugMode -ne 'true') { 
         Write-Information 'Not writing to log file - Debug mode is not enabled.'
         return
     }
-    $CleanMessage = [string]::join(' ', ($message.Split("`n"))) -replace '[|]', ':'
-    $logdata = "$($date)|$($tenant)|$($API)|$($CleanMessage)|$($username)|$($sev)"
-    if ($LogMutex.WaitOne(1000)) {
-        $logdata | Out-File -Append -FilePath "Logs\$((Get-Date).ToString('ddMMyyyy')).log" -Force
+    $PartitionKey = Get-Date -UFormat '%Y%m%d'
+    $LogRequest = @{
+        'Tenant'      = $tenant
+        'API'         = $API
+        'Message'     = $message
+        'Username'    = $username
+        'Severity'    = $sev
+        'SentAsAlert' = $false
     }
-    $LogMutex.ReleaseMutex()
+    $TableRow = @{
+        table        = $Table
+        partitionKey = $PartitionKey
+        rowKey       = [guid]::NewGuid()
+        property     = $LogRequest
+    }
+    Add-AzTableRow @TableRow | Out-Null
+
 }
 
 function New-GraphGetRequest ($uri, $tenantid, $scope, $AsApp, $noPagination) {
@@ -138,7 +163,7 @@ function Get-ClassicAPIToken($tenantID, $Resource) {
         return $token
     }
     catch {
-        Write-Error "Failed to obtain Classic API Token for $Tenant - $_"        
+        Throw "Failed to obtain Classic API Token for $TenantID - $_"        
     }
 }
 
@@ -411,7 +436,7 @@ function Get-CIPPMSolUsers {
     )
     $AADGraphtoken = (Get-GraphToken -scope 'https://graph.windows.net/.default')
     $tenantid = (get-tenants | Where-Object -Property DefaultDomainName -EQ $tenant).CustomerID
-    $TrackingGuid = New-Guid
+    $TrackingGuid = (New-Guid).GUID
     $LogonPost = @"
 <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing"><s:Header><a:Action s:mustUnderstand="1">http://provisioning.microsoftonline.com/IProvisioningWebService/MsolConnect</a:Action><a:MessageID>urn:uuid:$TrackingGuid</a:MessageID><a:ReplyTo><a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address></a:ReplyTo><UserIdentityHeader xmlns="http://provisioning.microsoftonline.com/" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><BearerToken xmlns="http://schemas.datacontract.org/2004/07/Microsoft.Online.Administration.WebService">$($AADGraphtoken['Authorization'])</BearerToken><LiveToken i:nil="true" xmlns="http://schemas.datacontract.org/2004/07/Microsoft.Online.Administration.WebService"/></UserIdentityHeader><ClientVersionHeader xmlns="http://provisioning.microsoftonline.com/" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><ClientId xmlns="http://schemas.datacontract.org/2004/07/Microsoft.Online.Administration.WebService">50afce61-c917-435b-8c6d-60aa5a8b8aa7</ClientId><Version xmlns="http://schemas.datacontract.org/2004/07/Microsoft.Online.Administration.WebService">1.2.183.57</Version></ClientVersionHeader><ContractVersionHeader xmlns="http://becwebservice.microsoftonline.com/" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><BecVersion xmlns="http://schemas.datacontract.org/2004/07/Microsoft.Online.Administration.WebService">Version47</BecVersion></ContractVersionHeader><TrackingHeader xmlns="http://becwebservice.microsoftonline.com/">$($TrackingGuid)</TrackingHeader><a:To s:mustUnderstand="1">https://provisioningapi.microsoftonline.com/provisioningwebservice.svc</a:To></s:Header><s:Body><MsolConnect xmlns="http://provisioning.microsoftonline.com/"><request xmlns:b="http://schemas.datacontract.org/2004/07/Microsoft.Online.Administration.WebService" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><b:BecVersion>Version4</b:BecVersion><b:TenantId i:nil="true"/><b:VerifiedDomain i:nil="true"/></request></MsolConnect></s:Body></s:Envelope>
 "@
@@ -452,11 +477,11 @@ function New-DeviceLogin {
 
         }
         else {
-            $ReturnCode = Invoke-RestMethod -Uri "https://login.microsoftonline.com/organizations/oauth2/v2.0/devicecode" -Method POST -Body "client_id=$($Clientid)&scope=$encodedscope+offline_access+profile+openid"
+            $ReturnCode = Invoke-RestMethod -Uri 'https://login.microsoftonline.com/organizations/oauth2/v2.0/devicecode' -Method POST -Body "client_id=$($Clientid)&scope=$encodedscope+offline_access+profile+openid"
         }
     }
     else {
-        $Checking = Invoke-RestMethod -SkipHttpErrorCheck -Uri "https://login.microsoftonline.com/organizations/oauth2/v2.0/token" -Method POST -Body "client_id=$($Clientid)&scope=$encodedscope+offline_access+profile+openid&grant_type=device_code&device_code=$($device_code)"
+        $Checking = Invoke-RestMethod -SkipHttpErrorCheck -Uri 'https://login.microsoftonline.com/organizations/oauth2/v2.0/token' -Method POST -Body "client_id=$($Clientid)&scope=$encodedscope+offline_access+profile+openid&grant_type=device_code&device_code=$($device_code)"
         if ($checking.refresh_token) {
             $ReturnCode = $Checking
         }
@@ -466,3 +491,4 @@ function New-DeviceLogin {
     }
     return $ReturnCode
 }
+
