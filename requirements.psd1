@@ -11,4 +11,5 @@
     'Az.Resources' = '5.*'
     'Az.Storage'   = '4.*'
     'AzTable'      = '2.*'
+    'AzBobbyTables' = '2.*'
 }

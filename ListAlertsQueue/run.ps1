@@ -4,13 +4,14 @@ using namespace System.Net
 param($Request, $TriggerMetadata)
 
 $APIName = $TriggerMetadata.FunctionName
-Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME -message 'Accessed this API' -Sev 'Debug'
+Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -message 'Accessed this API' -Sev 'Debug'
 
 
 # Write to the Azure Functions log stream.
 Write-Host 'PowerShell HTTP trigger function processed a request.'
 $Table = Get-CIPPTable -TableName 'SchedulerConfig' 
-$QueuedApps = Get-AzTableRow -Table $Table -PartitionKey 'Alert'
+$Filter = "PartitionKey eq 'Alert'"
+$QueuedApps = Get-AzDataTableEntity @Table -Filter $Filter
 
 $CurrentStandards = foreach ($QueueFile in $QueuedApps) {
     [PSCustomObject]@{
@@ -25,6 +26,10 @@ $CurrentStandards = foreach ($QueueFile in $QueuedApps) {
         QuotaUsed       = [bool]$QueueFile.QuotaUsed
         UnusedLicenses  = [bool]$QueueFile.UnusedLicenses
         AppSecretExpiry = [bool]$QueueFile.AppSecretExpiry
+        ApnCertExpiry   = [bool]$QueueFile.ApnCertExpiry
+        VppTokenExpiry  = [bool]$QueueFile.VppTokenExpiry
+        DepTokenExpiry  = [bool]$QueueFile.DepTokenExpiry
+        NoCAConfig      = [bool]$QueueFile.NoCAConfig
         tenantId        = $QueueFile.tenantid
     }
 }

@@ -1,189 +1,311 @@
 param($tenant)
-$Table = Get-CIPPTable -Table SchedulerConfig
-if ($Tenant.tag -eq 'AllTenants') {
-    $Alerts = Get-AzTableRow -Table $table -RowKey 'AllTenants' -PartitionKey 'Alert'
-}
-else {
-    $Alerts = Get-AzTableRow -Table $table -RowKey $Tenant.tenantid -PartitionKey 'Alert'
 
-}
-$DeltaTable = Get-CIPPTable -Table DeltaCompare
-$LastRunTable = Get-CIPPTable -Table AlertLastRun
+try {
 
-$ShippedAlerts = switch ($Alerts) {
-    { $_.'AdminPassword' -eq $true } {
-        try {
-            New-GraphGETRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?`$filter=roleDefinitionId eq '62e90394-69f5-4237-9190-012177145e10'" -tenantid $($tenant.tenant) | ForEach-Object { 
-                $LastChanges = New-GraphGETRequest -uri "https://graph.microsoft.com/beta/users/$($_.principalId)?`$select=UserPrincipalName,lastPasswordChangeDateTime" -tenant $($tenant.tenant)
-                if ([datetime]$LastChanges.LastPasswordChangeDateTime -gt (Get-Date).AddDays(-1)) { "Admin password has been changed for $($LastChanges.UserPrincipalName) in last 24 hours" }
-            }
-
-        }
-        catch {
-            "Could not get admin password changes for $($Tenant.tenant): $($_.Exception.message)"
-
-        }
+    $Table = Get-CIPPTable -Table SchedulerConfig
+    if ($Tenant.tag -eq 'AllTenants') {
+        $Filter = "RowKey eq 'AllTenants' and PartitionKey eq 'Alert'"
     }
-    { $_.'DefenderMalware' -eq $true } {
-        try {
-            New-GraphGetRequest -uri "https://graph.microsoft.com/beta/tenantRelationships/managedTenants/windowsDeviceMalwareStates?`$top=999&`$filter=tenantId eq '$($Tenant.tenantid)'" | Where-Object { $_.malwareThreatState -eq 'Active' } | ForEach-Object {
-                "$($_.managedDeviceName): Malware found and active. Severity: $($_.MalwareSeverity). Malware name: $($_.MalwareDisplayName)"
+    else {
+        $Filter = "RowKey eq '{0}' and PartitionKey eq 'Alert'" -f $Tenant.tenantid
+    }
+    $Alerts = Get-AzDataTableEntity @Table -Filter $Filter
+
+    $DeltaTable = Get-CIPPTable -Table DeltaCompare
+    $LastRunTable = Get-CIPPTable -Table AlertLastRun
+
+    $ShippedAlerts = switch ($Alerts) {
+        { $_.'AdminPassword' -eq $true } {
+            try {
+                New-GraphGETRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?`$filter=roleDefinitionId eq '62e90394-69f5-4237-9190-012177145e10'" -tenantid $($tenant.tenant) | Where-Object -Property 'principalOrganizationId' -EQ $tenant.tenantid | ForEach-Object { 
+                    $LastChanges = New-GraphGETRequest -uri "https://graph.microsoft.com/beta/users/$($_.principalId)?`$select=UserPrincipalName,lastPasswordChangeDateTime" -tenant $($tenant.tenant)
+                    if ([datetime]$LastChanges.LastPasswordChangeDateTime -gt (Get-Date).AddDays(-1)) { "Admin password has been changed for $($LastChanges.UserPrincipalName) in last 24 hours" }
+                }
+
+            }
+            catch {
+                "Could not get admin password changes for $($Tenant.tenant): $($_.Exception.message)"
             }
         }
-        catch {
+        { $_.'DefenderMalware' -eq $true } {
+            try {
+                New-GraphGetRequest -uri "https://graph.microsoft.com/beta/tenantRelationships/managedTenants/windowsDeviceMalwareStates?`$top=999&`$filter=tenantId eq '$($Tenant.tenantid)'" | Where-Object { $_.malwareThreatState -eq 'Active' } | ForEach-Object {
+                    "$($_.managedDeviceName): Malware found and active. Severity: $($_.MalwareSeverity). Malware name: $($_.MalwareDisplayName)"
+                }
+            }
+            catch {
 
+            }
         }
-    }
     
-    { $_.'DefenderStatus' -eq $true } {
-        try {
-            New-GraphGetRequest -uri "https://graph.microsoft.com/beta/tenantRelationships/managedTenants/windowsProtectionStates?`$top=999&`$filter=tenantId eq '$($Tenant.tenantid)'" | Where-Object { $_.realTimeProtectionEnabled -eq $false -or $_.MalwareprotectionEnabled -eq $false } | ForEach-Object {
-                "$($_.managedDeviceName) - Real Time Protection: $($_.realTimeProtectionEnabled) & Malware Protection: $($_.MalwareprotectionEnabled)"
+        { $_.'DefenderStatus' -eq $true } {
+            try {
+                New-GraphGetRequest -uri "https://graph.microsoft.com/beta/tenantRelationships/managedTenants/windowsProtectionStates?`$top=999&`$filter=tenantId eq '$($Tenant.tenantid)'" | Where-Object { $_.realTimeProtectionEnabled -eq $false -or $_.MalwareprotectionEnabled -eq $false } | ForEach-Object {
+                    "$($_.managedDeviceName) - Real Time Protection: $($_.realTimeProtectionEnabled) & Malware Protection: $($_.MalwareprotectionEnabled)"
+                }
             }
-        }
-        catch {
+            catch {
     
+            }
         }
-    }
-    { $_.'MFAAdmins' -eq $true } {
-        try {
-            $AdminIds = (New-GraphGETRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?`$filter=roleDefinitionId eq '62e90394-69f5-4237-9190-012177145e10'&expand=principal" -tenantid $($tenant.tenant)).principal
-            $AdminList = Get-CIPPMSolUsers -tenant $tenant.tenant | Where-Object -Property ObjectID -In $AdminIds.id
-            $StrongMFAMethods = '#microsoft.graph.fido2AuthenticationMethod', '#microsoft.graph.phoneAuthenticationMethod', '#microsoft.graph.passwordlessmicrosoftauthenticatorauthenticationmethod', '#microsoft.graph.softwareOathAuthenticationMethod', '#microsoft.graph.microsoftAuthenticatorAuthenticationMethod'
-            $AdminList | Where-Object { $_.Usertype -eq 'Member' -and $_.BlockCredential -eq $false } | ForEach-Object {
-                try {               
+        { $_.'MFAAdmins' -eq $true } {
+            try {
+                $AdminIds = (New-GraphGETRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments?`$filter=roleDefinitionId eq '62e90394-69f5-4237-9190-012177145e10'&expand=principal" -tenantid $($tenant.tenant)).principal
+                $AdminList = Get-CIPPMSolUsers -tenant $tenant.tenant | Where-Object -Property ObjectID -In $AdminIds.id
+                $StrongMFAMethods = '#microsoft.graph.fido2AuthenticationMethod', '#microsoft.graph.phoneAuthenticationMethod', '#microsoft.graph.passwordlessmicrosoftauthenticatorauthenticationmethod', '#microsoft.graph.softwareOathAuthenticationMethod', '#microsoft.graph.microsoftAuthenticatorAuthenticationMethod'
+                $AdminList | Where-Object { $_.Usertype -eq 'Member' -and $_.BlockCredential -eq $false } | ForEach-Object {
+                    try {               
                 (New-GraphGETRequest -uri "https://graph.microsoft.com/beta/users/$($_.ObjectID)/authentication/Methods" -tenantid $($tenant.tenant)) | ForEach-Object {
-                        if ($_.'@odata.type' -in $StrongMFAMethods -and !$CARegistered) { 
-                            $CARegistered = $true; 
-                        } }
-                    if ($_.StrongAuthenticationRequirements.StrongAuthenticationRequirement.state -eq $null -and $CARegistered -ne $true) { "Admin $($_.UserPrincipalName) is enabled but does not have any form of MFA configured." }
-                }
-                catch {
-                    $CARegistered = $false
+                            if ($_.'@odata.type' -in $StrongMFAMethods -and !$CARegistered) { 
+                                $CARegistered = $true; 
+                            } }
+                        if ($_.StrongAuthenticationRequirements.StrongAuthenticationRequirement.state -eq $null -and $CARegistered -ne $true) { "Admin $($_.UserPrincipalName) is enabled but does not have any form of MFA configured." }
+                    }
+                    catch {
+                        $CARegistered = $false
+                    }
                 }
             }
-        }
-        catch {
-            "Could not get MFA status for admins for $($Tenant.tenant): $($_.Exception.message)"
+            catch {
+                "Could not get MFA status for admins for $($Tenant.tenant): $($_.Exception.message)"
 
+            }
         }
-    }
-    { $_.'MFAAlertUsers' -eq $true } {
-        try {
-            $users = Get-CIPPMSolUsers -tenant $tenant.tenant
-            $StrongMFAMethods = '#microsoft.graph.fido2AuthenticationMethod', '#microsoft.graph.phoneAuthenticationMethod', '#microsoft.graph.passwordlessmicrosoftauthenticatorauthenticationmethod', '#microsoft.graph.softwareOathAuthenticationMethod', '#microsoft.graph.microsoftAuthenticatorAuthenticationMethod'
+        { $_.'MFAAlertUsers' -eq $true } {
+            try {
+                $users = Get-CIPPMSolUsers -tenant $tenant.tenant
+                $StrongMFAMethods = '#microsoft.graph.fido2AuthenticationMethod', '#microsoft.graph.phoneAuthenticationMethod', '#microsoft.graph.passwordlessmicrosoftauthenticatorauthenticationmethod', '#microsoft.graph.softwareOathAuthenticationMethod', '#microsoft.graph.microsoftAuthenticatorAuthenticationMethod'
 
-            $users | Where-Object { $_.Usertype -eq 'Member' -and $_.BlockCredential -eq $false } | ForEach-Object {
-                try {
+                $users | Where-Object { $_.Usertype -eq 'Member' -and $_.BlockCredential -eq $false } | ForEach-Object {
+                    try {
                 (New-GraphGETRequest -uri "https://graph.microsoft.com/beta/users/$($_.ObjectID)/authentication/Methods" -tenantid $($tenant.tenant)) | ForEach-Object {
-                        if ($_.'@odata.type' -in $StrongMFAMethods -and !$CARegistered) { 
-                            $CARegistered = $true; 
-                        } }
-                    if ($_.StrongAuthenticationRequirements.StrongAuthenticationRequirement.state -eq $null -and $CARegistered -eq $false) { "User $($_.UserPrincipalName) is enabled but does not have any form of MFA configured." }
+                            if ($_.'@odata.type' -in $StrongMFAMethods -and !$CARegistered) { 
+                                $CARegistered = $true; 
+                            } }
+                        if ($_.StrongAuthenticationRequirements.StrongAuthenticationRequirement.state -eq $null -and $CARegistered -eq $false) { "User $($_.UserPrincipalName) is enabled but does not have any form of MFA configured." }
+                    }
+                    catch {
+                        $CARegistered = $false
+                    }
                 }
-                catch {
-                    $CARegistered = $false
-                }
+
             }
+            catch {
+                "Could not get MFA status for users for $($Tenant.tenant): $($_.Exception.message)"
 
-        }
-        catch {
-            "Could not get MFA status for users for $($Tenant.tenant): $($_.Exception.message)"
-
-        }
-    }
-
-    { $_.'NewRole' -eq $true } {
-        try {
-            $AdminDelta = (Get-AzTableRow -Table $Deltatable -RowKey $Tenant.tenantid -PartitionKey 'AdminDelta').delta | ConvertFrom-Json -ErrorAction SilentlyContinue
-            $NewDelta = (New-GraphGetRequest -uri "https://graph.microsoft.com/beta/directoryRoles?`$expand=members" -tenantid $Tenant.tenant) | Select-Object displayname, Members | ForEach-Object {
-                [PSCustomObject]@{
-                    GroupName = $_.displayname
-                    Members   = $_.Members.UserPrincipalName
-                }
             }
-            $NewDeltatoSave = $NewDelta | ConvertTo-Json -Depth 10 -Compress -ErrorAction SilentlyContinue
-            $null = Add-AzTableRow -Table $DeltaTable -PartitionKey 'AdminDelta' -RowKey $Tenant.tenantid -property @{delta = $NewDeltatoSave } -UpdateExisting
+        }
+
+        { $_.'NewRole' -eq $true } {
+            try {
+                $Filter = "PartitionKey eq 'AdminDelta' and RowKey eq '{0}'" -f $Tenant.tenantid
+                $AdminDelta = (Get-AzDataTableEntity @Deltatable -Filter $Filter).delta | ConvertFrom-Json -ErrorAction SilentlyContinue
+                $NewDelta = (New-GraphGetRequest -uri "https://graph.microsoft.com/v1.0/directoryRoles?`$expand=members" -tenantid $Tenant.tenant) | Select-Object displayname, Members | ForEach-Object {
+                    @{
+                        GroupName = $_.displayname
+                        Members   = $_.Members.UserPrincipalName
+                    }
+                }
+                $NewDeltatoSave = $NewDelta | ConvertTo-Json -Depth 10 -Compress -ErrorAction SilentlyContinue | Out-String
+                $DeltaEntity = @{
+                    PartitionKey = 'AdminDelta'
+                    RowKey       = [string]$Tenant.tenantid
+                    delta        = "$NewDeltatoSave"
+                }
+                Add-AzDataTableEntity @DeltaTable -Entity $DeltaEntity -Force
         
-            if ($AdminDelta) {
-                foreach ($Group in $NewDelta) {
-                    $OldDelta = $AdminDelta | Where-Object { $_.GroupName -eq $Group.GroupName }
-                    $Group.members | Where-Object { $_ -notin $OldDelta.members } | ForEach-Object {
-                        "$_ has been added to the $($Group.GroupName) Role"
+                if ($AdminDelta) {
+                    foreach ($Group in $NewDelta) {
+                        $OldDelta = $AdminDelta | Where-Object { $_.GroupName -eq $Group.GroupName }
+                        $Group.members | Where-Object { $_ -notin $OldDelta.members } | ForEach-Object {
+                            "$_ has been added to the $($Group.GroupName) Role"
+                        }
                     }
                 }
             }
-        }
-        catch {
-            "Could not get get role changes for $($Tenant.tenant): $($_.Exception.message)"
+            catch {
+                "Could not get get role changes for $($Tenant.tenant): $($_.Exception.message)"
 
-        }
-    }
-    { $_.'QuotaUsed' -eq $true } {
-        try {
-            New-GraphGetRequest -uri "https://graph.microsoft.com/beta/reports/getMailboxUsageDetail(period='D7')?`$format=application/json" -tenantid $Tenant.tenant | ForEach-Object {
-                $PercentLeft = [math]::round($_.StorageUsedInBytes / $_.prohibitSendReceiveQuotaInBytes * 100)
-                if ($PercentLeft -gt 90) { "$($_.UserPrincipalName): Mailbox has less than 10% space left. Mailbox is $PercentLeft% full" }
             }
         }
-        catch {
+        { $_.'QuotaUsed' -eq $true } {
+            try {
+                New-GraphGetRequest -uri "https://graph.microsoft.com/beta/reports/getMailboxUsageDetail(period='D7')?`$format=application/json" -tenantid $Tenant.tenant | ForEach-Object {
+                    $PercentLeft = [math]::round($_.StorageUsedInBytes / $_.prohibitSendReceiveQuotaInBytes * 100)
+                    if ($PercentLeft -gt 90) { "$($_.UserPrincipalName): Mailbox has less than 10% space left. Mailbox is $PercentLeft% full" }
+                }
+            }
+            catch {
     
+            }
         }
-    }
-    { $_.'UnusedLicenses' -eq $true } {
-        try {
-            #$ConvertTable = Import-Csv Conversiontable.csv
-            $ExcludedSkuList = Get-AzTableRow -Table (Get-CIPPTable -TableName ExcludedLicenses)
-            New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/subscribedSkus' -tenantid $Tenant.tenant | ForEach-Object {
-                $skuid = $_
-                foreach ($sku in $skuid) {
-                    if ($sku.skuId -in $ExcludedSkuList.guid) { continue }
-                    $PrettyName = ($ConvertTable | Where-Object { $_.guid -eq $sku.skuid }).'Product_Display_Name' | Select-Object -Last 1
-                    if (!$PrettyName) { $PrettyName = $skuid.skuPartNumber }
-
-                    if ($sku.prepaidUnits.enabled - $sku.consumedUnits -ne 0) {
-                        "$PrettyName has unused licenses. Using $($sku.consumedUnits) of $($sku.prepaidUnits.enabled)."
+        { $_.'NoCAConfig' -eq $true } {
+            try {
+                $CAAvailable = (New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/subscribedSkus' -tenantid $Tenant.Tenant -erroraction stop).serviceplans
+                if ('AAD_PREMIUM' -in $CAAvailable.servicePlanName) {
+                    $CAPolicies = (New-GraphGetRequest -uri 'https://graph.microsoft.com/v1.0/identity/conditionalAccess/policies' -tenantid $Tenant.Tenant) 
+                    if (!$CAPolicies.id) {
+                        'Conditional Access is available, but no policies could be found.' 
                     }
                 }
             }
+            catch {
+            }
         }
-        catch {
+        { $_.'UnusedLicenses' -eq $true } {
+            try {
+                #$ConvertTable = Import-Csv Conversiontable.csv
+                $LicenseTable = Get-CIPPTable -TableName ExcludedLicenses
+                $ExcludedSkuList = Get-AzDataTableEntity @LicenseTable
+                New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/subscribedSkus' -tenantid $Tenant.tenant | ForEach-Object {
+                    $skuid = $_
+                    foreach ($sku in $skuid) {
+                        if ($sku.skuId -in $ExcludedSkuList.GUID) { continue }
+                        $PrettyName = ($ConvertTable | Where-Object { $_.GUID -eq $sku.skuid }).'Product_Display_Name' | Select-Object -Last 1
+                        if (!$PrettyName) { $PrettyName = $skuid.skuPartNumber }
+
+                        if ($sku.prepaidUnits.enabled - $sku.consumedUnits -ne 0) {
+                            "$PrettyName has unused licenses. Using $($sku.consumedUnits) of $($sku.prepaidUnits.enabled)."
+                        }
+                    }
+                }
+            }
+            catch {
     
+            }
         }
-    }
-    { $_.'AppSecretExpiry' -eq $true } {
-        try {
-            $LastRun = Get-AzTableRow -Table $LastRunTable -RowKey 'AppSecretExpiry' -PartitionKey $Tenant.tenantid
-            if ($null -eq $LastRun.TableTimestamp -or ($LastRun.TableTimestamp -lt (Get-Date).AddDays(-1))) {
-                New-GraphGetRequest -uri "https://graph.microsoft.com/beta/applications?`$select=appId,displayName,passwordCredentials" -tenantid $Tenant.tenant | ForEach-Object {
-                    foreach ($App in $_) {
-                        if ($App.passwordCredentials) {
-                            foreach ($Credential in $App.passwordCredentials) {
-                                if ($Credential.endDateTime -lt (Get-Date).AddDays(30) -and $Credential.endDateTime -gt (Get-Date).AddDays(-7)) {
-                                    "Application '{0}' has secrets expiring on {1}" -f $App.displayName, $Credential.endDateTime
+        { $_.'AppSecretExpiry' -eq $true } {
+            try {
+                $Filter = "RowKey eq 'AppSecretExpiry' and PartitionKey eq '{0}'" -f $Tenant.tenantid
+                $LastRun = Get-AzDataTableEntity @LastRunTable -Filter $Filter
+                $Yesterday = (Get-Date).AddDays(-1)
+                if (-not $LastRun.Timestamp.DateTime -or ($LastRun.Timestamp.DateTime -le $Yesterday)) {
+                    New-GraphGetRequest -uri "https://graph.microsoft.com/beta/applications?`$select=appId,displayName,passwordCredentials" -tenantid $Tenant.tenant | ForEach-Object {
+                        foreach ($App in $_) {
+                            if ($App.passwordCredentials) {
+                                foreach ($Credential in $App.passwordCredentials) {
+                                    if ($Credential.endDateTime -lt (Get-Date).AddDays(30) -and $Credential.endDateTime -gt (Get-Date).AddDays(-7)) {
+                                        "Application '{0}' has secrets expiring on {1}" -f $App.displayName, $Credential.endDateTime
+                                    }
                                 }
                             }
                         }
                     }
+                    $LastRun = @{
+                        RowKey       = 'AppSecretExpiry'
+                        PartitionKey = $Tenant.tenantid
+                    }
+                    Add-AzDataTableEntity @LastRunTable -Entity $LastRun -Force
                 }
-                $null = Add-AzTableRow -Table $LastRunTable -RowKey 'AppSecretExpiry' -PartitionKey $Tenant.tenantid -UpdateExisting
+            }
+            catch {
+                #$Message = 'Exception on line {0} - {1}' -f $_.InvocationInfo.ScriptLineNumber, $_.Exception.Message
+                #Write-LogMessage -message $Message -API 'Alerts' -tenant $tenant.tenant -sev Error
             }
         }
-        catch {
-
+        { $_.'ApnCertExpiry' -eq $true } {
+            try {
+                $Filter = "RowKey eq 'ApnCertExpiry' and PartitionKey eq '{0}'" -f $Tenant.tenantid
+                $LastRun = Get-AzDataTableEntity @LastRunTable -Filter $Filter
+                $Yesterday = (Get-Date).AddDays(-1)
+                if (-not $LastRun.Timestamp.DateTime -or ($LastRun.Timestamp.DateTime -le $Yesterday)) {
+                    try { 
+                        $Apn = New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/deviceManagement/applePushNotificationCertificate' -tenantid $Tenant.tenant 
+                        if ($Apn.expirationDateTime -lt (Get-Date).AddDays(30) -and $Apn.expirationDateTime -gt (Get-Date).AddDays(-7)) {
+                            "Apple Push Notification certificate for '{0}' is expiring on {1}" -f $App.appleIdentifier, $Apn.expirationDateTime
+                        }
+                    }
+                    catch {}
+                }
+                $LastRun = @{
+                    RowKey       = 'ApnCertExpiry'
+                    PartitionKey = $Tenant.tenantid
+                }
+                Add-AzDataTableEntity @LastRunTable -Entity $LastRun -Force         
+            }
+            catch {
+                #$Message = 'Exception on line {0} - {1}' -f $_.InvocationInfo.ScriptLineNumber, $_.Exception.Message
+                #Write-LogMessage -message $Message -API 'Alerts' -tenant $tenant.tenant -sev Error
+            }
+        }
+        { $_.'VppTokenExpiry' -eq $true } {
+            try {
+                $Filter = "RowKey eq 'VppTokenExpiry' and PartitionKey eq '{0}'" -f $Tenant.tenantid
+                $LastRun = Get-AzDataTableEntity @LastRunTable -Filter $Filter
+                $Yesterday = (Get-Date).AddDays(-1)
+                if (-not $LastRun.Timestamp.DateTime -or ($LastRun.Timestamp.DateTime -le $Yesterday)) {
+                    try {
+                        $VppTokens = (New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/deviceAppManagement/vppTokens' -tenantid $Tenant.tenant).value 
+                        foreach ($Vpp in $VppTokens) {
+                            if ($Vpp.state -ne 'valid') {
+                                'Apple Volume Purchase Program Token is not valid, new token required'
+                            }
+                            if ($Vpp.expirationDateTime -lt (Get-Date).AddDays(30) -and $Vpp.expirationDateTime -gt (Get-Date).AddDays(-7)) {
+                                'Apple Volume Purchase Program token expiring on {0}' -f $Vpp.expirationDateTime
+                            } 
+                        }
+                    }
+                    catch {}
+                    $LastRun = @{
+                        RowKey       = 'VppTokenExpiry'
+                        PartitionKey = $Tenant.tenantid
+                    }
+                    Add-AzDataTableEntity @LastRunTable -Entity $LastRun -Force
+                }
+            }
+            catch {
+                #$Message = 'Exception on line {0} - {1}' -f $_.InvocationInfo.ScriptLineNumber, $_.Exception.Message
+                #Write-LogMessage -message $Message -API 'Alerts' -tenant $tenant.tenant -sev Error
+            }
+        }
+        { $_.'DepTokenExpiry' -eq $true } {
+            try {
+                $Filter = "RowKey eq 'DepTokenExpiry' and PartitionKey eq '{0}'" -f $Tenant.tenantid
+                $LastRun = Get-AzDataTableEntity @LastRunTable -Filter $Filter
+                $Yesterday = (Get-Date).AddDays(-1)
+                if (-not $LastRun.Timestamp.DateTime -or ($LastRun.Timestamp.DateTime -le $Yesterday)) {
+                    try {
+                        $DepTokens = (New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/deviceManagement/depOnboardingSettings' -tenantid $Tenant.tenant).value 
+                        foreach ($Dep in $DepTokens) {
+                            if ($Dep.tokenExpirationDateTime -lt (Get-Date).AddDays(30) -and $Dep.tokenExpirationDateTime -gt (Get-Date).AddDays(-7)) {
+                                'Apple Device Enrollment Program token expiring on {0}' -f $Dep.expirationDateTime
+                            }
+                        }
+                    }
+                    catch {}
+                    $LastRun = @{
+                        RowKey       = 'DepTokenExpiry'
+                        PartitionKey = $Tenant.tenantid
+                    }
+                    Add-AzDataTableEntity @LastRunTable -Entity $LastRun -Force 
+                }
+            }
+            catch {
+                #$Message = 'Exception on line {0} - {1}' -f $_.InvocationInfo.ScriptLineNumber, $_.Exception.Message
+                #Write-LogMessage -message $Message -API 'Alerts' -tenant $tenant.tenant -sev Error
+            }
         }
     }
-}
 
-$Table = Get-CIPPTable
-$PartitionKey = Get-Date -UFormat '%Y%m%d'
-$currentlog = Get-AzTableRow -Table $table -PartitionKey $PartitionKey 
+    $Table = Get-CIPPTable
+    $PartitionKey = Get-Date -UFormat '%Y%m%d'
+    $Filter = "PartitionKey eq '{0}' and Tenant eq '{1}'" -f $PartitionKey, $tenant.tenant
+    Write-Host $Filter
+    $currentlog = Get-AzDataTableEntity @Table -Filter $Filter
 
-$ShippedAlerts | ForEach-Object {
-    if ($_ -notin $currentlog.Message) {
-        Log-Request -message $_ -API 'Alerts' -tenant $tenant.tenant -sev Alert
+    $ShippedAlerts | ForEach-Object {
+        if ($_ -notin $currentlog.Message) {
+            Write-LogMessage -message $_ -API 'Alerts' -tenant $tenant.tenant -sev Alert
+        }
+    }
+    [PSCustomObject]@{
+        ReturnedValues = $true
     }
 }
-[PSCustomObject]@{
-    ReturnedValues = $true
+catch {
+    $Message = 'Exception on line {0} - {1}' -f $_.InvocationInfo.ScriptLineNumber, $_.Exception.Message
+    Write-LogMessage -message $Message -API 'Alerts' -tenant $tenant.tenant -sev Error
+    [PSCustomObject]@{
+        ReturnedValues = $false
+    }
 }

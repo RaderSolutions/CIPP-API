@@ -4,7 +4,7 @@ using namespace System.Net
 param($Request, $TriggerMetadata)
 
 $APIName = $TriggerMetadata.FunctionName
-Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Accessed this API" -Sev "Debug"
+Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Accessed this API" -Sev "Debug"
 
 
 # Write to the Azure Functions log stream.
@@ -12,18 +12,12 @@ Write-Host "PowerShell HTTP trigger function processed a request."
 
 # Interact with query parameters or the body of the request.
 $TenantFilter = $Request.Query.TenantFilter
-try {
-    $body = '{"deletedUserPersonalSiteRetentionPeriodInDays":360}'
-    $GraphRequest = New-GraphPostRequest -tenantid $TenantFilter -Uri "https://graph.microsoft.com/beta/admin/sharepoint/settings" -AsApp $true -Type patch -Body $body -ContentType "application/json"
-    $StatusCode = [HttpStatusCode]::OK
-}
-catch {
-    $ErrorMessage = Get-NormalizedError -Message $_.Exception.Message
-    $StatusCode = [HttpStatusCode]::Forbidden
-    $GraphRequest = $ErrorMessage
-}
+Set-Location (Get-Item $PSScriptRoot).Parent.FullName
+$body = '{"deletedUserPersonalSiteRetentionPeriodInDays": 80}'
+$GraphRequest = New-GraphPostRequest -tenantid $tenantfilter -Uri "https://graph.microsoft.com/beta/admin/sharepoint/settings" -AsApp $true -Type PATCH -Body $body -ContentType "application/json"
+
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
-        StatusCode = $StatusCode
+        StatusCode = [HttpStatusCode]::OK
         Body       = @($GraphRequest)
     })

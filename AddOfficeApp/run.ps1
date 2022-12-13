@@ -4,7 +4,7 @@ using namespace System.Net
 param($Request, $TriggerMetadata)
 
 $APIName = $TriggerMetadata.FunctionName
-Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME -message "Accessed this API" -Sev "Debug"
+Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -message "Accessed this API" -Sev "Debug"
 
 
 # Write to the Azure Functions log stream.
@@ -50,6 +50,7 @@ $results = foreach ($Tenant in $tenants) {
                 "autoAcceptEula"                       = [bool]$request.body.AcceptLicense
                 "excludedApps"                         = $ExcludedApps
                 "officePlatformArchitecture"           = $Arch
+                "officeSuiteAppDefaultFileFormat"      = "OfficeOpenXMLFormat"
                 "localesToInstall"                     = @($request.body.languages.value)
                 "shouldUninstallOlderVersionsOfOffice" = [bool]$request.body.RemoveVersions
                 "updateChannel"                        = $request.body.updateChannel.value
@@ -67,17 +68,17 @@ $results = foreach ($Tenant in $tenants) {
             "Office deployment already exists for $($Tenant)"
             Continue
         }
-        Log-Request -user $request.headers.'x-ms-client-principal' -API $APIName -tenant $($tenant) -message "Added Office profile to $($tenant)" -Sev "Info"
+        Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APIName -tenant $($tenant) -message "Added Office profile to $($tenant)" -Sev "Info"
         if ($AssignTo) {
             $AssignO365 = if ($AssignTo -ne "AllDevicesAndUsers") { '{"mobileAppAssignments":[{"@odata.type":"#microsoft.graph.mobileAppAssignment","target":{"@odata.type":"#microsoft.graph.' + $($AssignTo) + 'AssignmentTarget"},"intent":"Required"}]}' } else { '{"mobileAppAssignments":[{"@odata.type":"#microsoft.graph.mobileAppAssignment","target":{"@odata.type":"#microsoft.graph.allDevicesAssignmentTarget"},"intent":"Required"},{"@odata.type":"#microsoft.graph.mobileAppAssignment","target":{"@odata.type":"#microsoft.graph.allLicensedUsersAssignmentTarget"},"intent":"Required"}]}' }           Write-Host ($AssignO365)
             New-graphPostRequest -Uri "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps/$($OfficeAppID.id)/assign" -tenantid $tenant -Body $AssignO365 -type POST
-            Log-Request -user $request.headers.'x-ms-client-principal' -API $APIName -tenant $($tenant) -message "Assigned Office to $AssignTo" -Sev "Info"
+            Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APIName -tenant $($tenant) -message "Assigned Office to $AssignTo" -Sev "Info"
         }
-        "Succesfully added Office Application for $($Tenant)"
+        "Successfully added Office Application for $($Tenant)"
     }
     catch {
         "Failed to add Office App for $($Tenant): $($_.Exception.Message)"
-        Log-Request -user $request.headers.'x-ms-client-principal' -API $APIName  -tenant $($tenant)  -message "Failed adding Autopilot Profile $($Displayname). Error: $($_.Exception.Message)" -Sev "Error"
+        Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APIName  -tenant $($tenant)  -message "Failed adding Autopilot Profile $($Displayname). Error: $($_.Exception.Message)" -Sev "Error"
         continue
     }
 

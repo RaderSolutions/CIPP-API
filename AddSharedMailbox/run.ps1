@@ -4,7 +4,7 @@ using namespace System.Net
 param($Request, $TriggerMetadata)
 
 $APIName = $TriggerMetadata.FunctionName
-Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Accessed this API" -Sev "Debug"
+Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Accessed this API" -Sev "Debug"
 
 $groupobj = $Request.body
 $user = $request.headers.'x-ms-client-principal'
@@ -23,12 +23,12 @@ try {
     }
     New-ExoRequest -tenantid $Request.body.tenantid -cmdlet "New-Mailbox" -cmdparams $BodyToship
 
-    $body = [pscustomobject]@{"Results" = "Succesfully created shared mailbox." }
-    Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME -tenant $($groupobj.tenantid) -message "Created group $($groupobj.displayname) with id $($GraphRequest.id) for " -Sev "Info"
+    $body = [pscustomobject]@{"Results" = "Successfully created shared mailbox." }
+    Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -tenant $($groupobj.tenantid) -message "Created group $($groupobj.displayname) with id $($GraphRequest.id) for " -Sev "Info"
 
 }
 catch {
-    Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME -tenant $($groupobj.tenantid) -message "Group creation API failed. $($_.Exception.Message)" -Sev "Error"
+    Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -tenant $($groupobj.tenantid) -message "Group creation API failed. $($_.Exception.Message)" -Sev "Error"
     $body = [pscustomobject]@{"Results" = "Failed to create group. $($_.Exception.Message)" }
 
 }

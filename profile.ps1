@@ -15,6 +15,11 @@ import-module .\GraphHelper.psm1
 import-module .\LabtechHelper.psm1
 Disable-AzContextAutosave -Scope Process | Out-Null
 
+Import-Module .\GraphHelper.psm1
+try {
+    Disable-AzContextAutosave -Scope Process | Out-Null
+}
+catch {}
 
 # Uncomment the next line to enable legacy AzureRm alias in Azure PowerShell.
 # Enable-AzureRmAlias

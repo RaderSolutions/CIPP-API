@@ -4,7 +4,7 @@ using namespace System.Net
 param($Request, $TriggerMetadata)
 
 $APIName = $TriggerMetadata.FunctionName
-Log-Request -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Accessed this API" -Sev "Debug"
+Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Accessed this API" -Sev "Debug"
 
 
 # Write to the Azure Functions log stream.
@@ -29,7 +29,7 @@ if ($Request.Query.owners) {
     $selectstring = "id,createdDateTime,displayName,description,hideFromOutlookClients,hideFromAddressLists,mail,mailEnabled,mailNickname,resourceProvisioningOptions,securityEnabled,visibility,organizationId,onPremisesSamAccountName,membershipRule"
 }
 try {
-    $GraphRequest = New-GraphGetRequest -asApp $true -uri "https://graph.microsoft.com/beta/groups/$($GroupID)/$($members)?`$top=999&select=$selectstring" -tenantid $TenantFilter  | Select-Object *, @{ Name = 'primDomain'; Expression = { $_.mail -split "@" | Select-Object -Last 1 } },
+    $GraphRequest = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/groups/$($GroupID)/$($members)?`$top=999&select=$selectstring" -tenantid $TenantFilter  | Select-Object *, @{ Name = 'primDomain'; Expression = { $_.mail -split "@" | Select-Object -Last 1 } },
     @{Name = 'teamsEnabled'; Expression = { if ($_.resourceProvisioningOptions -Like '*Team*') { $true }else { $false } } },
     @{Name = 'calculatedGroupType'; Expression = {
 

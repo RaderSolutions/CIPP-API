@@ -29,14 +29,26 @@ function Resolve-DnsHttpsQuery {
         [string]$RecordType = 'A'
     )
 
-    if (Test-Path -Path 'Config\DnsConfig.json') {
-        try {
-            $Config = Get-Content 'Config\DnsConfig.json' | ConvertFrom-Json 
+    try {
+        $ConfigTable = Get-CippTable -tablename Config
+        $Filter = "PartitionKey eq 'Domains' and RowKey eq 'Domains'"
+        $Config = Get-AzDataTableEntity @ConfigTable -Filter $Filter
+
+        $ValidResolvers = @('Google', 'CloudFlare', 'Quad9')
+        if ($ValidResolvers -contains $Config.Resolver) {
             $Resolver = $Config.Resolver
         }
-        catch { $Resolver = 'Google' }
+        else {
+            $Resolver = 'Google'
+            $Config = @{
+                PartitionKey = 'Domains'
+                RowKey       = 'Domains'
+                Resolver     = $Resolver
+            }
+            Add-AzDataTableEntity @ConfigTable -Entity $Config -Force
+        }
     }
-    else {
+    catch {
         $Resolver = 'Google'
     }
 
@@ -67,6 +79,7 @@ function Resolve-DnsHttpsQuery {
         $Results.Answer | ForEach-Object {
             $_.data = $_.data -replace '"' -replace '\s+', ' '
         }
+        $Results.Answer = $Results.Answer | Where-Object { $_.type -eq 16 } 
     }
     
     return $Results
@@ -250,6 +263,8 @@ function Read-MXRecord {
         Domain     = $Domain
     }
 
+    Set-Location (Get-Item $PSScriptRoot).FullName
+    
     $NoMxValidation = 'There are no mail exchanger records for this domain. If you do not want to receive mail for this domain use a Null MX record of . with a priority 0 (RFC 7505).'
  
     $MXResults.Domain = $Domain
@@ -298,11 +313,15 @@ function Read-MXRecord {
                 $MXResults.MailProvider = Get-Content 'MailProviders\Null.json' | ConvertFrom-Json
             }
             else {
-                Get-ChildItem 'MailProviders' -Exclude '_template.json' | ForEach-Object {
-                    try {
-                        $Provider = Get-Content $_ | ConvertFrom-Json -ErrorAction Stop
-                        $MXRecords.Hostname | ForEach-Object {
-                            if ($_ -match $Provider.MxMatch) {
+                $ProviderList = Get-ChildItem 'MailProviders' -Exclude '_template.json' | ForEach-Object { 
+                    try { Get-Content $_ | ConvertFrom-Json -ErrorAction Stop } 
+                    catch {} 
+                }
+                foreach ($Record in $MXRecords) {
+                    $ProviderMatched = $false
+                    foreach ($Provider in $ProviderList) {
+                        try {
+                            if ($Record.Hostname -match $Provider.MxMatch) {
                                 $MXResults.MailProvider = $Provider
                                 if (($Provider.SpfReplace | Measure-Object | Select-Object -ExpandProperty Count) -gt 0) {
                                     $ReplaceList = [System.Collections.Generic.List[string]]::new()
@@ -324,10 +343,15 @@ function Read-MXRecord {
                                 # Set ExpectedInclude and Selector fields based on provider details
                                 $MXResults.ExpectedInclude = $ExpectedInclude
                                 $MXResults.Selectors = $Provider.Selectors
+                                $ProviderMatched = $true
+                                break
                             }
                         }
+                        catch {}
                     }
-                    catch {}
+                    if ($ProviderMatched) {
+                        break
+                    }
                 }
             }
         }
@@ -1079,11 +1103,14 @@ function Read-DmarcPolicy {
         if ($ForensicCount -eq 0 -and $DmarcAnalysis.FailureReport -ne '') { $ValidationWarns.Add('Forensic email reports recipients are not defined and failure report options are set. No reports will be sent. This is not an issue unless you are expecting forensic reports.') | Out-Null }
         if ($DmarcAnalysis.FailureReport -eq '' -and $null -ne $DmarcRecord) { $DmarcAnalysis.FailureReport = '0' }
         if ($ForensicCount -gt 0) {
-            if ($FailureReportValues -notcontains $DmarcAnalysis.FailureReport) { $ValidationFails.Add('Failure reporting options must be 0, 1, d or s.') | Out-Null }
-            if ($DmarcAnalysis.FailureReport -eq '1') { $ValidationPasses.Add('Failure report option 1 generates forensic reports on SPF or DKIM misalignment.') | Out-Null }
-            if ($DmarcAnalysis.FailureReport -eq '0') { $ValidationWarns.Add('Failure report option 0 will only generate a forensic report on both SPF and DKIM misalignment. It is recommended to set this value to 1.') | Out-Null }
-            if ($DmarcAnalysis.FailureReport -eq 'd') { $ValidationWarns.Add('Failure report option d will only generate a forensic report on failed DKIM evaluation. It is recommended to set this value to 1.') | Out-Null }
-            if ($DmarcAnalysis.FailureReport -eq 's') { $ValidationWarns.Add('Failure report option s will only generate a forensic report on failed SPF evaluation. It is recommended to set this value to 1.') | Out-Null }
+            $ReportOptions = $DmarcAnalysis.FailureReport -split ':'
+            foreach ($ReportOption in $ReportOptions) {
+                if ($FailureReportValues -notcontains $ReportOption) { $ValidationFails.Add("Failure report option '$ReportOption' is not a valid choice.") | Out-Null }
+                if ($ReportOption -eq '1') { $ValidationPasses.Add('Failure report option 1 generates forensic reports on SPF or DKIM misalignment.') | Out-Null }
+                if ($ReportOption -eq '0' -and $ReportOptions -notcontains '1') { $ValidationWarns.Add('Failure report option 0 will only generate a forensic report on both SPF and DKIM misalignment. It is recommended to set this value to 1.') | Out-Null }
+                if ($ReportOption -eq 'd' -and $ReportOptions -notcontains '1') { $ValidationWarns.Add('Failure report option d will only generate a forensic report on failed DKIM evaluation. It is recommended to set this value to 1.') | Out-Null }
+                if ($ReportOption -eq 's' -and $ReportOptions -notcontains '1') { $ValidationWarns.Add('Failure report option s will only generate a forensic report on failed SPF evaluation. It is recommended to set this value to 1.') | Out-Null }
+            }
         }
     }
 
@@ -1668,9 +1695,12 @@ namespace SevenTiny.Bantina.Security {
     }
 }
 '@
-    if (!('SevenTiny.Bantina.Security.RSACommon' -as [type])) {
-        Add-Type -TypeDefinition $source -Language CSharp
+    try {
+        if (!('SevenTiny.Bantina.Security.RSACommon' -as [type])) {
+            Add-Type -TypeDefinition $source -Language CSharp
+        }
     }
+    catch {}
 
     # Return RSA Public Key information
     [SevenTiny.Bantina.Security.RSACommon]::CreateRsaProviderFromPublicKey($EncodedString)
@@ -1902,9 +1932,12 @@ namespace CyberDrain.CIPP {
     }
 }
 '@
-    if (!('CyberDrain.CIPP.CertificateCheck' -as [type])) {
-        Add-Type -TypeDefinition $source -Language CSharp
+    try { 
+        if (!('CyberDrain.CIPP.CertificateCheck' -as [type])) {
+            Add-Type -TypeDefinition $source -Language CSharp
+        }
     }
+    catch {}
 
     [CyberDrain.CIPP.CertificateCheck]::GetServerCertificate($Url, $FollowRedirect)
 }
