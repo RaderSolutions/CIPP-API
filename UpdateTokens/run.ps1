@@ -1,9 +1,10 @@
 # Input bindings are passed in via param block.
 param($Timer)
-
+write-host "updating"
 # Get the current universal time in the default string format.
 $currentUTCtime = (Get-Date).ToUniversalTime()
-
+$tst = Get-GraphToken
+$tst | convertto-json
 $Refreshtoken = (Get-GraphToken -ReturnRefresh $true).Refresh_token
 $ExchangeRefreshtoken = (Get-GraphToken -AppID 'a0c73c16-a7e3-4564-9a95-2bdf47383716' -refreshtoken $ENV:ExchangeRefreshtoken -ReturnRefresh $true).Refresh_token
 
