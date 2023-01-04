@@ -31,7 +31,7 @@ if ($Request.Query.MailboxId) {
 }
 else {
     $table = Invoke-SqlQuery -Query "SELECT
-    astKey AS 'Blocked Numbers'
+    astKey AS 'BlockedNumber'
  FROM plugin_rader_ratel_astdb
  WHERE
     client_id=$cwaClientId
