@@ -18,11 +18,11 @@ if ($Request.Query.MailboxId) {
     $extensionId = $Request.Query.ExtensionId
     $membershipType = $Request.Query.MembershipType
     write-host $extensionId
-    $table = Invoke-SqlQuery -Query "SELECT Extension,membership_type,GROUP_CONCAT(group_name) AS 'Groups' FROM plugin_rader_ratel_pickupgroups WHERE client_id=$cwaClientId and extension=$extensionId and membership_type=$membershipType GROUP BY extension,membership_type
+    $table = Invoke-SqlQuery -Query "SELECT Extension,membership_type AS 'Type',GROUP_CONCAT(group_name) AS 'Groups' FROM plugin_rader_ratel_pickupgroups WHERE client_id=$cwaClientId and extension=$extensionId and membership_type=$membershipType GROUP BY extension,membership_type
     " -AsDataTable 
 }
 else {
-    $table = Invoke-SqlQuery -Query "SELECT Extension,membership_type,GROUP_CONCAT(group_name) AS 'Groups' FROM plugin_rader_ratel_pickupgroups WHERE client_id=$cwaClientId GROUP BY extension,membership_type
+    $table = Invoke-SqlQuery -Query "SELECT Extension,membership_type AS 'Type',GROUP_CONCAT(group_name) AS 'Groups' FROM plugin_rader_ratel_pickupgroups WHERE client_id=$cwaClientId GROUP BY extension,membership_type
 " -AsDataTable 
 }
 $data = $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors
