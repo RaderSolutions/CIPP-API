@@ -14,19 +14,19 @@ $TenantFilter = $Request.Query.TenantFilter
 $cwaClientId = Get-LabtechClientId($TenantFilter)
 write-host $cwaClientId
 
-if($Request.Query.MailboxId){
+if($Request.Query.PhonebookEntryId){
     $phonebookEntryId=$Request.Query.PhonebookEntryId
     write-host $phonebookEntryId
     $table = Invoke-SqlQuery -Query "SELECT ID,
        Dial,
        Prefix AS 'Salutation',
-       first_name AS 'First Name',
-       second_name AS 'Middle Name',
-       last_name AS 'Last Name',
+       first_name AS 'FirstName',
+       second_name AS 'MiddleName',
+       last_name AS 'LastName',
        Suffix,
        primary_email AS 'Email',
        Organization,
-       job_title AS 'Job Title',
+       job_title AS 'JobTitle',
        Location,
        Notes 
 FROM plugin_rader_ratel_external_contacts 
