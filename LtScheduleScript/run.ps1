@@ -60,7 +60,7 @@ if($parameters){
             SkipOfflineAgents = $True
         }
         Priority = 12
-    } | ConvertTo-json
+    } | ConvertTo-json -Depth 6
 } else { 
     $scriptBody= @{ 
         EntityType = $targetType
@@ -77,7 +77,7 @@ if($parameters){
             SkipOfflineAgents = $True
         }
         Priority = 12
-    } | ConvertTo-json
+    } | ConvertTo-json -Depth 6
 }
 
 write-host $scriptBody
