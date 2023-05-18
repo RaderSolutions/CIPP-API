@@ -26,7 +26,13 @@ foreach ($blob in $blobs) {
     }
 }
 
+$responseData = @{
+    "jsonContents" = $jsonContents
+    "blobs" = $blobs
+}
+
+
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
     StatusCode = [HttpStatusCode]::OK
-    Body       = $jsonContents
+    Body       = $responseData | ConvertTo-Json
 })
