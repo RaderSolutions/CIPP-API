@@ -13,7 +13,7 @@ if ($env:MSI_SECRET) {
     $AzSession = Connect-AzAccount -Identity
 }
 
-$KV = $ENV:ApplicationID
+$KV = $ENV:WEBSITE_DEPLOYMENT_ID
 
 if ($Refreshtoken) { 
     Set-AzKeyVaultSecret -VaultName $kv -Name 'RefreshToken' -SecretValue (ConvertTo-SecureString -String $Refreshtoken -AsPlainText -Force)
