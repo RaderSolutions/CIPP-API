@@ -40,6 +40,8 @@ VALUES (
    '$($entryObj.Location)',
    '$($entryObj.Notes)',
    $cwaClientId,
+       'sip',
+        0)
 );
 "@
 
