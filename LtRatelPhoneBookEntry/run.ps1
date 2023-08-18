@@ -52,7 +52,7 @@ VALUES (
 } 
 catch { 
     $body = @{"Results" = "Something went wrong."
-     "Request Action" = $entryObj
+     "Request Action" = $Request
     }
     write-host $_.Exception
 }
