@@ -13,8 +13,8 @@ $cwaClientId = Get-LabtechClientId($TenantFilter)
 # Get Automate Auth Token
 $null = Connect-AzAccount -Identity
 # $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
-WriteHost "ACTION" + $Request.Query.Action
-WriteHost "TENANT" + $Request.Query.TenantFilter
+Write-Host "ACTION" + $Request.Query.Action
+Write-Host "TENANT" + $Request.Query.TenantFilter
 try {
     if ($Request.Query.Action -eq "Delete") { 
         Invoke-SqlQuery -Query "DELETE FROM plugin_rader_ratel_external_contacts WHERE id=$($Request.Query.ID) AND client_id=$cwaClientId LIMIT 1;"
