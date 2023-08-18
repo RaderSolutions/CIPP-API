@@ -48,7 +48,9 @@ VALUES (
 
 } 
 catch { 
-    $body = @{"Results" = "Something went wrong." }
+    $body = @{"Results" = "Something went wrong."
+     "Request Action" = $Request.Query.Action
+    }
     write-host $_.Exception
 }
 
