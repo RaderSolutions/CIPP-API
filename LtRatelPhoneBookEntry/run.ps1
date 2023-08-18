@@ -1,4 +1,4 @@
-using namespace System.Net
+rtusing namespace System.Net
 
 # Input bindings are passed in via param block.
 param($Request, $TriggerMetadata)
@@ -52,7 +52,7 @@ VALUES (
 } 
 catch { 
     $body = @{"Results" = "Something went wrong."
-     "Request Action" = $Request.Query.Action
+     "Request Action" = $entryObj
     }
     write-host $_.Exception
 }
