@@ -14,7 +14,7 @@ $cwaClientId = Get-LabtechClientId($TenantFilter)
 $null = Connect-AzAccount -Identity
 # $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
 Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:LtUser -Password $ENV:LtPass -Port 3306
-Write-Host "QUERY: $($Request.body)"
+
 Write-Host "TENANT: $($TenantFilter)"
 try {
     if ($Request.Query.Action -eq "Delete") { 
@@ -22,6 +22,7 @@ try {
     }
     if ($Request.Query.Action -eq "Update") { 
         $entryObj = $Request.body
+        Write-Host "QUERY: $($entryObj.Email)"
         Invoke-SqlQuery -Query "UPDATE plugin_rader_ratel_external_contacts SET dial=$($entryObj.Dial), prefix=$($entryObj.Salutation), first_name=$($entryObj.FirstName), second_name=$($entryObj.MiddleName), last_name=$($entryObj.LastName), suffix=$($entryObj.Suffix), primary_email=$($entryObj.Email), organization=$($entryObj.Organization), job_title=$($entryObj.JobTitle), location=$($entryObj.Location), notes=$($entryObj.Notes) WHERE client_id=$cwaClientId AND id=$($entryObj.ID) LIMIT 1;"
     }
     else { 
