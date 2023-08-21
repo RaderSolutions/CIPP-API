@@ -14,7 +14,7 @@ $cwaClientId = Get-LabtechClientId($TenantFilter)
 $null = Connect-AzAccount -Identity
 # $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
 Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:LtUser -Password $ENV:LtPass -Port 3306
-Write-Host "ACTION: $($Request.Query.Action)"
+Write-Host "QUERY: $($Request.Query)"
 Write-Host "TENANT: $($TenantFilter)"
 try {
     if ($Request.Query.Action -eq "Delete") { 
