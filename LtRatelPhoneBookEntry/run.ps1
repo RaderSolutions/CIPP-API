@@ -27,25 +27,22 @@ try {
         Write-Host "org: $($entryObj.Organization)"
         Write-Host $($entryObj) | ConvertTo-Json
         Write-Host "CLIENT ID: $($cwaClientId)"
-     Invoke-SqlQuery -Query UPDATE
-    plugin_rader_ratel_external_contacts
-SET
-    dial = 'dialTestSyntax',
-    prefix = 'prefix',
-    first_name = 'first',
-    second_name = 'mid',
-    last_name = 'last',
-    suffix = 'suffix',
-    primary_email = 'email',
-    organization = 'org',
-    job_title = 'job',
-    location = 'loc',
-    notes = 'notes'
-WHERE
-    client_id = '205'
-    AND id = '5087067'
-LIMIT
-    1
+     Invoke-SqlQuery -Query @"
+UPDATE labtech.plugin_rader_ratel_external_contacts 
+SET dial='$($entryObj.Dial)', 
+    prefix='$($entryObj.Salutation)', 
+    first_name='$($entryObj.FirstName)', 
+    second_name='$($entryObj.MiddleName)', 
+    last_name='$($entryObj.LastName)', 
+    suffix='$($entryObj.Suffix)', 
+    primary_email='$($entryObj.Email)', 
+    organization='$($entryObj.Organization)', 
+    job_title='$($entryObj.JobTitle)', 
+    location='$($entryObj.Location)',
+    notes='$($entryObj.Notes)' 
+WHERE client_id=$cwaClientId AND id=$($entryObj.ID) 
+LIMIT 1;
+"@
 
     }
     else { 
