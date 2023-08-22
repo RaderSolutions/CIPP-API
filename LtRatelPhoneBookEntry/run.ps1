@@ -30,7 +30,7 @@ try {
      Invoke-SqlQuery -Query UPDATE
     plugin_rader_ratel_external_contacts
 SET
-    dial = 'dial',
+    dial = 'dialTestSyntax',
     prefix = 'prefix',
     first_name = 'first',
     second_name = 'mid',
