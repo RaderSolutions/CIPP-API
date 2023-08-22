@@ -27,7 +27,22 @@ try {
         Write-Host "org: $($entryObj.Organization)"
         Write-Host $($entryObj) | ConvertTo-Json
         Write-Host "CLIENT ID: $($cwaClientId)"
-        Invoke-SqlQuery -Query "UPDATE labtech.plugin_rader_ratel_external_contacts SET dial=$($entryObj.Dial), prefix=$($entryObj.Salutation), first_name=$($entryObj.FirstName), second_name=$($entryObj.MiddleName), last_name=$($entryObj.LastName), suffix=$($entryObj.Suffix), primary_email=$($entryObj.Email), organization=$($entryObj.Organization), job_title=$($entryObj.JobTitle), location=$($entryObj.Location), notes=$($entryObj.Notes) WHERE client_id=$cwaClientId AND id=$($entryObj.ID) LIMIT 1;"
+     Invoke-SqlQuery -Query @'
+    UPDATE labtech.plugin_rader_ratel_external_contacts 
+    SET dial=@($entryObj.Dial), 
+    prefix=@($entryObj.Salutation), 
+    first_name=@($entryObj.FirstName), 
+    second_name=@($entryObj.MiddleName), 
+    last_name=@($entryObj.LastName), 
+    suffix=@($entryObj.Suffix), 
+    primary_email=@($entryObj.Email), 
+    organization=@($entryObj.Organization), 
+    job_title=@($entryObj.JobTitle), 
+    location=@($entryObj.Location),
+    notes=@($entryObj.Notes) 
+    WHERE client_id=@($cwaClientId) AND id=@($entryObj.ID) LIMIT 1;
+'@
+
     }
     else { 
 $entryObj = $Request.body
