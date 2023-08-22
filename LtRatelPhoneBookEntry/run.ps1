@@ -14,20 +14,18 @@ $cwaClientId = Get-LabtechClientId($TenantFilter)
 $null = Connect-AzAccount -Identity
 # $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
 Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:LtUser -Password $ENV:LtPass -Port 3306
+$entryObj = $Request.body
 
-Write-Host "TENANT: $($TenantFilter)"
 try {
     if ($Request.Query.Action -eq "Delete") { 
-        Invoke-SqlQuery -Query "DELETE FROM plugin_rader_ratel_external_contacts WHERE id=$($Request.Query.ID) AND client_id=$cwaClientId LIMIT 1;"
+        Invoke-SqlQuery -Query @"
+DELETE FROM plugin_rader_ratel_external_contacts 
+WHERE id=$($Request.Query.ID) AND client_id=$cwaClientId 
+LIMIT 1;
+"@
     }
     if ($Request.Query.Action -eq "Update") { 
-        $entryObj = $Request.body
-        Write-Host "QUERY: $($entryObj.Email)"
-        Write-Host "ID: $($entryObj.ID)"
-        Write-Host "org: $($entryObj.Organization)"
-        Write-Host $($entryObj) | ConvertTo-Json
-        Write-Host "CLIENT ID: $($cwaClientId)"
-     Invoke-SqlQuery -Query @"
+       Invoke-SqlQuery -Query @"
 UPDATE labtech.plugin_rader_ratel_external_contacts 
 SET dial='$($entryObj.Dial)', 
     prefix='$($entryObj.Salutation)', 
@@ -46,8 +44,8 @@ LIMIT 1;
 
     }
     else { 
-$entryObj = $Request.body
-Invoke-SqlQuery -Query @"
+        $entryObj = $Request.body
+        Invoke-SqlQuery -Query @"
 INSERT INTO plugin_rader_ratel_external_contacts (dial, prefix, first_name, second_name, last_name, suffix, primary_email, organization, job_title, location, notes, client_id, contact_type, is_from_fop)
 VALUES (
    '$($entryObj.Dial)',
