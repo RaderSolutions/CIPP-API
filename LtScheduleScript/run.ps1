@@ -28,6 +28,7 @@ if($Request.Query.RatelScript -eq "true"){
         $Request.Query.Parameters.replace("|", "`n").split(",") | foreach { 
             $parameter = ConvertFrom-StringData -StringData $_
             $parameters += $parameter
+            write-host $parameters
         }
     } elseif ($scriptobj) {
         #TODO: handle parameters sent from form
@@ -52,7 +53,7 @@ if($parameters){
             }
         }
         Parameters = @(
-            '$($parameters)'
+            $parameters
         )
         UseAgentTime = $False 
         StartDate = $date
