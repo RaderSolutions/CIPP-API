@@ -52,7 +52,7 @@ if($parameters){
             }
         }
         Parameters = @(
-            $parameters
+            '$($parameters)'
         )
         UseAgentTime = $False 
         StartDate = $date
