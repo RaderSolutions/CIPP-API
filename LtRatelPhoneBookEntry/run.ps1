@@ -59,10 +59,10 @@ VALUES (
    '$($entryObj.JobTitle)',
    '$($entryObj.Location)',
    '$($entryObj.Notes)',
-   $cwaClientId,
-       'sip',
-        0)
-);
+   '$($cwaClientId)',
+   '$($entryObj.ContactType)',
+   '$($entryObj.IsFromFOP)'
+    );
 "@
 
     }
