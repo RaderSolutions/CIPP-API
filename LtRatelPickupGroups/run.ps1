@@ -26,7 +26,7 @@ INSERT INTO plugin_rader_ratel_pickupgroups
 VALUES (
    '$($cwaClientId)',
    '$($pickupGroupObj.Extension)',
-   $($pickupGroupObj.Type),
+   '$($pickupGroupObj.Type)',
    '$($pickupGroupObj.Groups)'
 );
 
