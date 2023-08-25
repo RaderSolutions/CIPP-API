@@ -60,8 +60,8 @@ VALUES (
    '$($entryObj.Location)',
    '$($entryObj.Notes)',
    '$($cwaClientId)',
-   '$($entryObj.ContactType)',
-   '$($entryObj.IsFromFOP)'
+   'sip'
+   0
     );
 "@
 
