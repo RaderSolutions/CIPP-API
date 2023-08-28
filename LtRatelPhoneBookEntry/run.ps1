@@ -61,7 +61,7 @@ VALUES (
    '$($entryObj.Notes)',
    '$($cwaClientId)',
    'sip',
-   0
+   '0'
     );
 "@
 
