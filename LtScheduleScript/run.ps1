@@ -15,6 +15,7 @@ $cwaHeaders.Add("Authorization", "Bearer $token")
 $cwaHeaders.Add("ClientId", $ENV:CwaClientId)
 $cwaHeaders.Add("Content-Type", "application/json")
 $scriptobj = $Request.body
+write-host $scriptobj
 $date = Get-Date -Format "o"
 $Request.Query | convertto-json
 if($Request.Query.RatelScript -eq "true"){
@@ -52,9 +53,9 @@ if($parameters){
                 ScriptScheduleFrequencyId = 1
             }
         }
-        Parameters = @(
-            $parameters
-        )
+        Parameters = "@(
+            '$($parameters)'
+        )"
         UseAgentTime = $False 
         StartDate = $date
         OfflineActionFlags = @{
