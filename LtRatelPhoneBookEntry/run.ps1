@@ -46,7 +46,7 @@ LIMIT 1;
     else { 
         $entryObj = $Request.body
         Invoke-SqlQuery -Query @"
-INSERT INTO plugin_rader_ratel_external_contacts (dial, prefix, first_name, second_name, last_name, suffix, primary_email, organization, job_title, location, notes, client_id, contact_type, is_from_fop)
+INSERT INTO labtech.plugin_rader_ratel_external_contacts (dial, prefix, first_name, second_name, last_name, suffix, primary_email, organization, job_title, location, notes, client_id, contact_type, is_from_fop)
 VALUES (
    '$($entryObj.Dial)',
    '$($entryObj.Salutation)',
