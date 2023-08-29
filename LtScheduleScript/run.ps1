@@ -53,9 +53,9 @@ if($parameters){
                 ScriptScheduleFrequencyId = 1
             }
         }
-        Parameters = "@(
-            '$($parameters)'
-        )"
+        Parameters = @(
+            $parameters
+        )
         UseAgentTime = $False 
         StartDate = $date
         OfflineActionFlags = @{
