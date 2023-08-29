@@ -59,7 +59,7 @@ VALUES (
    '$($entryObj.JobTitle)',
    '$($entryObj.Location)',
    '$($entryObj.Notes)',
-    $cwaClientId,
+   '$($cwaClientId)',
    'sip',
    '0'
     );
