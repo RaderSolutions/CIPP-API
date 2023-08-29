@@ -33,6 +33,7 @@ if($Request.Query.RatelScript -eq "true"){
         }
     } elseif ($scriptobj) {
         #TODO: handle parameters sent from form
+        write-host $scriptobj
     }
 
     $targetType =1
