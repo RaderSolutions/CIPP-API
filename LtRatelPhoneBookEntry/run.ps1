@@ -44,7 +44,7 @@ LIMIT 1;
 
     }
     else { 
-        write-host $entryObj
+        write-host $cwaClientId
         Invoke-SqlQuery -Query @"
 INSERT INTO labtech.plugin_rader_ratel_external_contacts (dial, prefix, first_name, second_name, last_name, suffix, primary_email, organization, job_title, location, notes, client_id, account_id, subscribe_to, custom_dial_action, contact_type, is_from_fop)
 VALUES (
