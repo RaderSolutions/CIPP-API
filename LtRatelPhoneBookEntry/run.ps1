@@ -10,6 +10,7 @@ Import-Module SimplySql
 # get cwm id
 $TenantFilter = $Request.Query.TenantFilter
 $cwaClientId = Get-LabtechClientId($TenantFilter)
+write-host $cwaClientId
 # Get Automate Auth Token
 $null = Connect-AzAccount -Identity
 # $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
