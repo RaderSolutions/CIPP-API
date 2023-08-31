@@ -15,7 +15,7 @@ $null = Connect-AzAccount -Identity
 # $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
 Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:LtUser -Password $ENV:LtPass -Port 3306
 $entryObj = $Request.body
-
+write-host $cwaClientId
 try {
     if ($Request.Query.Action -eq "Delete") { 
         Invoke-SqlQuery -Query @"
@@ -25,7 +25,7 @@ LIMIT 1;
 "@
     }
     if ($Request.Query.Action -eq "Update") { 
-       Invoke-SqlQuery -Query @"
+        Invoke-SqlQuery -Query @"
 UPDATE labtech.plugin_rader_ratel_external_contacts 
 SET dial='$($entryObj.Dial)', 
     prefix='$($entryObj.Salutation)', 
@@ -46,7 +46,7 @@ LIMIT 1;
     else { 
         $entryObj = $Request.body
         Invoke-SqlQuery -Query @"
-INSERT INTO labtech.plugin_rader_ratel_external_contacts (dial, prefix, first_name, second_name, last_name, suffix, primary_email, organization, job_title, location, notes, client_id, contact_type, is_from_fop)
+INSERT INTO labtech.plugin_rader_ratel_external_contacts (dial, prefix, first_name, second_name, last_name, suffix, primary_email, organization, job_title, location, notes, client_id, account_id, subscribe_to, custom_dial_action, contact_type, is_from_fop)
 VALUES (
    '$($entryObj.Dial)',
    '$($entryObj.Salutation)',
@@ -60,6 +60,9 @@ VALUES (
    '$($entryObj.Location)',
    '$($entryObj.Notes)',
    '$($cwaClientId)',
+        '',
+        '',
+        '',
    'sip',
    '0'
     );
