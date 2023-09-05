@@ -6,7 +6,6 @@ $currentUTCtime = (Get-Date).ToUniversalTime()
 $tst = Get-GraphToken
 $tst | convertto-json
 $Refreshtoken = (Get-GraphToken -ReturnRefresh $true).Refresh_token
-$ExchangeRefreshtoken = (Get-GraphToken -AppID 'a0c73c16-a7e3-4564-9a95-2bdf47383716' -refreshtoken $ENV:ExchangeRefreshtoken -ReturnRefresh $true).Refresh_token
 
 if ($env:MSI_SECRET) {
     Disable-AzContextAutosave -Scope Process | Out-Null
@@ -18,13 +17,8 @@ $KV = 'cipphglzr'
 if ($Refreshtoken) { 
     Set-AzKeyVaultSecret -VaultName $kv -Name 'RefreshToken' -SecretValue (ConvertTo-SecureString -String $Refreshtoken -AsPlainText -Force)
 }
-else { Write-LogMessage -message "Could not update refresh token. Will try again in 7 days." -sev "CRITICAL" }
-if ($ExchangeRefreshtoken -and $KV) {
-    Set-AzKeyVaultSecret -VaultName $kv -Name 'ExchangeRefreshToken' -SecretValue (ConvertTo-SecureString -String $ExchangeRefreshtoken -AsPlainText -Force)
-    Write-LogMessage -message "System API: Updated Exchange Refresh token." -sev "info" -API "TokensUpdater"
-}
-else {
-    Write-LogMessage -message "Could not update Exchange refresh token. Will try again in 7 days." -sev "CRITICAL" -API "TokensUpdater"
+else { 
+    Write-LogMessage -message "Could not update refresh token. Will try again in 7 days." -sev "CRITICAL" 
 }
 
 # Write an information log with the current time.
