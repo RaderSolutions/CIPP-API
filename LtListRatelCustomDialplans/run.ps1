@@ -17,7 +17,7 @@ write-host $cwaClientId
 if ($Request.Query.Extension -and $Request.Query.Type) {
     $extension = $Request.Query.Extension
     $Type = $Request.Query.Type
-    $table = Invoke-SqlQuery -Query "SELECT id, client_id, dialplan_name, dialplan_data, description FROM labtech.plugin_rader_ratel_custom_dialplan WHERE client_id=$cwaClientId" -AsDataTable 
+    $table = Invoke-SqlQuery -Query "SELECT id, client_id, dialplan_name, dialplan_data, description FROM labtech.plugin_rader_ratel_custom_dialplans WHERE client_id=$cwaClientId" -AsDataTable 
 }
 # else {
 #     $table = Invoke-SqlQuery -Query "SELECT id, client_id, dialplan_name, dialplan_data, description FROM plugin_rader_ratel_custom_dialplan WHERE client_id=$cwaClientId GROUP BY extension,membership_type
