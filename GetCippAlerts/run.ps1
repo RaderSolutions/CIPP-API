@@ -36,6 +36,7 @@ if ($version.outOfDateCIPPAPI) {
     Write-LogMessage -message "Your CIPP API is out of date. Please update to the latest version" -API 'Updates' -tenant "All Tenants" -sev Alert
 }
 
+write-output("deployment id: " + $ENV:WEBSITE_DEPLOYMENT_ID)
 write-output("App id: " + $env:ApplicationID)
 
 if ($env:ApplicationID -eq 'LongApplicationID' -or $null -eq $ENV:ApplicationID) { $Alerts.add(@{Alert = 'You have not yet setup your SAM Setup. Please go to the SAM Wizard in settings to finish setup'; link = "/cipp/setup"; type = "warning" }) }
