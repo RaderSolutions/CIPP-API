@@ -75,10 +75,6 @@ function Get-GraphToken($tenantid, $scope, $AsApp, $AppID, $refreshToken, $Retur
             Write-Host 'Graph: cached token'
             $AccessToken = $script:AccessTokens.$TokenKey
         } else {
-            Write-Host 'Graph: new token'
-            write-host  "https://login.microsoftonline.com/$($tenantid)/oauth2/v2.0/token" 
-            $jsontemp = $AuthBody | convertto-json
-            Write-Host("auth body: " + $jsontemp)
             $AccessToken = (Invoke-RestMethod -Method post -Uri "https://login.microsoftonline.com/$($tenantid)/oauth2/v2.0/token" -Body $Authbody -ErrorAction Stop)
             $ExpiresOn = [int](Get-Date -UFormat %s -Millisecond 0) + $AccessToken.expires_in
             Add-Member -InputObject $AccessToken -NotePropertyName 'expires_on' -NotePropertyValue $ExpiresOn
@@ -165,7 +161,6 @@ function New-GraphGetRequest {
             $headers = @{ Authorization = "Bearer $($AccessToken.access_token)" }
         } else {
             $headers = Get-GraphToken -tenantid $tenantid -scope $scope -AsApp $asapp
-            write-host $headers | ConvertTo-Json
         }
 
         if ($ComplexFilter) {
@@ -188,7 +183,6 @@ function New-GraphGetRequest {
 
         $ReturnedData = do {
             try {
-                write-host "here... "
                 $Data = (Invoke-RestMethod -Uri $nextURL -Method GET -Headers $headers -ContentType 'application/json; charset=utf-8')
                 if ($CountOnly) {
                     $Data.'@odata.count'
@@ -198,7 +192,6 @@ function New-GraphGetRequest {
                     if ($noPagination) { $nextURL = $null } else { $nextURL = $data.'@odata.nextLink' }
                 }
             } catch {
-                write-host "error here"
                 $Message = ($_.ErrorDetails.Message | ConvertFrom-Json -ErrorAction SilentlyContinue).error.message
                 if ($Message -eq $null) { $Message = $($_.Exception.Message) }
                 if ($Message -ne 'Request not applicable to target tenant.') {
@@ -431,7 +424,6 @@ function Get-Tenants {
     if (!$LastRefresh -or $LastRefresh -lt (Get-Date).Addhours(-24).ToUniversalTime()) {
         try {
             Write-Host "Renewing. Cache not hit. $LastRefresh"
-            write-host("tenant: " + $env:TenantID)
             $TenantList = (New-GraphGetRequest -uri "https://graph.microsoft.com/beta/tenantRelationships/managedTenants/tenants?`$top=999" -tenantid $env:TenantID ) | Select-Object id, @{l = 'customerId'; e = { $_.tenantId } }, @{l = 'DefaultdomainName'; e = { [string]($_.contract.defaultDomainName) } } , @{l = 'MigratedToNewTenantAPI'; e = { $true } }, DisplayName, domains, @{n = 'delegatedPrivilegeStatus'; exp = { $_.tenantStatusInformation.delegatedPrivilegeStatus } } | Where-Object -Property defaultDomainName -NotIn $SkipListCache.defaultDomainName
 
         } catch {
@@ -757,7 +749,6 @@ function New-GraphBulkRequest {
             }
 
             foreach ($MoreData in $ReturnedData.Responses | Where-Object { $_.body.'@odata.nextLink' }) {
-                Write-Host 'Getting more'
                 $AdditionalValues = New-GraphGetRequest -ComplexFilter -uri $MoreData.body.'@odata.nextLink' -tenantid $TenantFilter -NoAuthCheck:$NoAuthCheck
                 $NewValues = [System.Collections.Generic.List[PSCustomObject]]$MoreData.body.value
                 $AdditionalValues | ForEach-Object { $NewValues.add($_) }
