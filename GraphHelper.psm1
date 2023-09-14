@@ -47,7 +47,7 @@ function Get-GraphToken($tenantid, $scope, $AsApp, $AppID, $refreshToken, $Retur
         refresh_token = $env:RefreshToken
         grant_type    = 'refresh_token'
     }
-    write-output $AuthBody
+    write-host $AuthBody
     if ($asApp -eq $true) {
         $AuthBody = @{
             client_id     = $env:ApplicationID
@@ -162,7 +162,7 @@ function New-GraphGetRequest {
             $headers = @{ Authorization = "Bearer $($AccessToken.access_token)" }
         } else {
             $headers = Get-GraphToken -tenantid $tenantid -scope $scope -AsApp $asapp
-            write-output $headers
+            write-host $headers
         }
 
         if ($ComplexFilter) {
@@ -194,7 +194,7 @@ function New-GraphGetRequest {
                     if ($noPagination) { $nextURL = $null } else { $nextURL = $data.'@odata.nextLink' }
                 }
             } catch {
-                write-output "error here"
+                write-host "error here"
                 $Message = ($_.ErrorDetails.Message | ConvertFrom-Json -ErrorAction SilentlyContinue).error.message
                 if ($Message -eq $null) { $Message = $($_.Exception.Message) }
                 if ($Message -ne 'Request not applicable to target tenant.') {
