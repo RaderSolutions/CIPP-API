@@ -47,6 +47,7 @@ function Get-GraphToken($tenantid, $scope, $AsApp, $AppID, $refreshToken, $Retur
         refresh_token = $env:RefreshToken
         grant_type    = 'refresh_token'
     }
+    write-output $AuthBody
     if ($asApp -eq $true) {
         $AuthBody = @{
             client_id     = $env:ApplicationID
@@ -426,6 +427,7 @@ function Get-Tenants {
     if (!$LastRefresh -or $LastRefresh -lt (Get-Date).Addhours(-24).ToUniversalTime()) {
         try {
             Write-Host "Renewing. Cache not hit. $LastRefresh"
+            write-host("tenant: " + $env:TenantID)
             $TenantList = (New-GraphGetRequest -uri "https://graph.microsoft.com/beta/tenantRelationships/managedTenants/tenants?`$top=999" -tenantid $env:TenantID ) | Select-Object id, @{l = 'customerId'; e = { $_.tenantId } }, @{l = 'DefaultdomainName'; e = { [string]($_.contract.defaultDomainName) } } , @{l = 'MigratedToNewTenantAPI'; e = { $true } }, DisplayName, domains, @{n = 'delegatedPrivilegeStatus'; exp = { $_.tenantStatusInformation.delegatedPrivilegeStatus } } | Where-Object -Property defaultDomainName -NotIn $SkipListCache.defaultDomainName
 
         } catch {
