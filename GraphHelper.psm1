@@ -47,7 +47,7 @@ function Get-GraphToken($tenantid, $scope, $AsApp, $AppID, $refreshToken, $Retur
         refresh_token = $env:RefreshToken
         grant_type    = 'refresh_token'
     }
-    write-host $AuthBody
+  
     if ($asApp -eq $true) {
         $AuthBody = @{
             client_id     = $env:ApplicationID
@@ -76,6 +76,8 @@ function Get-GraphToken($tenantid, $scope, $AsApp, $AppID, $refreshToken, $Retur
             $AccessToken = $script:AccessTokens.$TokenKey
         } else {
             Write-Host 'Graph: new token'
+            write-host  "https://login.microsoftonline.com/$($tenantid)/oauth2/v2.0/token" 
+            write-host $AuthBody | convertto-json
             $AccessToken = (Invoke-RestMethod -Method post -Uri "https://login.microsoftonline.com/$($tenantid)/oauth2/v2.0/token" -Body $Authbody -ErrorAction Stop)
             $ExpiresOn = [int](Get-Date -UFormat %s -Millisecond 0) + $AccessToken.expires_in
             Add-Member -InputObject $AccessToken -NotePropertyName 'expires_on' -NotePropertyValue $ExpiresOn
@@ -162,7 +164,7 @@ function New-GraphGetRequest {
             $headers = @{ Authorization = "Bearer $($AccessToken.access_token)" }
         } else {
             $headers = Get-GraphToken -tenantid $tenantid -scope $scope -AsApp $asapp
-            write-host $headers
+            write-host $headers | ConvertTo-Json
         }
 
         if ($ComplexFilter) {
@@ -185,6 +187,7 @@ function New-GraphGetRequest {
 
         $ReturnedData = do {
             try {
+                write-host "here... "
                 $Data = (Invoke-RestMethod -Uri $nextURL -Method GET -Headers $headers -ContentType 'application/json; charset=utf-8')
                 if ($CountOnly) {
                     $Data.'@odata.count'
