@@ -161,6 +161,7 @@ function New-GraphGetRequest {
             $headers = @{ Authorization = "Bearer $($AccessToken.access_token)" }
         } else {
             $headers = Get-GraphToken -tenantid $tenantid -scope $scope -AsApp $asapp
+            write-output $headers
         }
 
         if ($ComplexFilter) {
@@ -192,6 +193,7 @@ function New-GraphGetRequest {
                     if ($noPagination) { $nextURL = $null } else { $nextURL = $data.'@odata.nextLink' }
                 }
             } catch {
+                write-output "error here"
                 $Message = ($_.ErrorDetails.Message | ConvertFrom-Json -ErrorAction SilentlyContinue).error.message
                 if ($Message -eq $null) { $Message = $($_.Exception.Message) }
                 if ($Message -ne 'Request not applicable to target tenant.') {
