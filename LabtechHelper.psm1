@@ -9,7 +9,7 @@ function Get-LabtechClientId($TenantFilter) {
 
     # get cwa id
     $null = Connect-AzAccount -Identity
-    $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
+    $token = Get-AzKeyVaultSecret -VaultName 'rader-cipp-api' -Name 'cwaRefreshToken' -AsPlainText
     $cwaHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $cwaHeaders.Add("Authorization", "Bearer $token")
     $cwaHeaders.Add("ClientId", $ENV:CwaClientId)
