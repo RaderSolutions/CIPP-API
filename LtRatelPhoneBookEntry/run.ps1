@@ -22,6 +22,7 @@ try {
     if ($Request.Query.Action -eq "Delete") { 
         write-host "req action"
         write-host $Request.Query.Action
+        write-host $Request.Query
 #         Invoke-SqlQuery -Query @"
 # DELETE FROM plugin_rader_ratel_external_contacts 
 # WHERE id=$($Request.Query.ID) AND client_id=$cwaClientId 
