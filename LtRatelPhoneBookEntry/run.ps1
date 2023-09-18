@@ -9,9 +9,9 @@ Import-Module SimplySql
 # $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
 Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:LtUser -Password $ENV:LtPass -Port 3306
 # get cwm id
-$TenantFilter = $Request.Query.TenantFilter
-write-host $Request.Query.TenantFilter
-write-host $Request.Query.FirstName
+$TenantFilter = $Request.body.TenantFilter
+write-host $Request.body.TenantFilter
+write-host $Request.body.FirstName
 
 $cwaClientId = Get-LabtechClientId($TenantFilter)
 write-host $cwaClientId
