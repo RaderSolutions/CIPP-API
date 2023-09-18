@@ -13,6 +13,8 @@ $TenantFilter = $Request.Query.TenantFilter
 write-host $Request.Query
 write-host "Request Query: $Request.Query"
 write-host " TenantFilter: $TenantFilter"
+$reqJson = $Request.body | ConvertTo-Json
+write-host "Request Body: $reqJson"
 $cwaClientId = Get-LabtechClientId($TenantFilter)
 write-host $cwaClientId
 # Get Automate Auth Token
