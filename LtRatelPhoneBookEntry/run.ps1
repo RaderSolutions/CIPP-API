@@ -10,11 +10,9 @@ Import-Module SimplySql
 Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:LtUser -Password $ENV:LtPass -Port 3306
 # get cwm id
 $TenantFilter = $Request.body.TenantFilter
-write-host $Request.body.TenantFilter
-write-host $Request.body.FirstName
 
 $cwaClientId = Get-LabtechClientId($TenantFilter)
-write-host $cwaClientId
+write-host "cwaClientId $cwaClientId"
 # Get Automate Auth Token
 $null = Connect-AzAccount -Identity
 
