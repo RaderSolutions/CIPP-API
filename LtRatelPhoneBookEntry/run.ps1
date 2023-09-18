@@ -20,11 +20,13 @@ $entryObj = $Request.body
 write-host $cwaClientId
 try {
     if ($Request.Query.Action -eq "Delete") { 
-        Invoke-SqlQuery -Query @"
-DELETE FROM plugin_rader_ratel_external_contacts 
-WHERE id=$($Request.Query.ID) AND client_id=$cwaClientId 
-LIMIT 1;
-"@
+        write-host "req action"
+        write-host $Request.Query.Action
+#         Invoke-SqlQuery -Query @"
+# DELETE FROM plugin_rader_ratel_external_contacts 
+# WHERE id=$($Request.Query.ID) AND client_id=$cwaClientId 
+# LIMIT 1;
+# "@
     }
     if ($Request.Query.Action -eq "Update") { 
         Invoke-SqlQuery -Query @"
