@@ -20,21 +20,22 @@ try {
         UPDATE plugin_rader_ratel_device SET is_sync_scheduled=1 WHERE client_id=$cwaClientId AND extension_number=$($Request.Query.Extension);"
     }
     else { 
-     $pickupGroupObj = $Request.body
-Invoke-SqlQuery -Query @"
-INSERT INTO plugin_rader_ratel_pickupgroups 
-(client_id, extension, membership_type, group_name) 
-VALUES (
-   '$($cwaClientId)',
-   '$($pickupGroupObj.Extension)',
-   '$($pickupGroupObj.Type)',
-   '$($pickupGroupObj.Groups)'
-);
+        write-host "add entry client id: $cwaClientId"
+#      $pickupGroupObj = $Request.body
+# Invoke-SqlQuery -Query @"
+# INSERT INTO plugin_rader_ratel_pickupgroups 
+# (client_id, extension, membership_type, group_name) 
+# VALUES (
+#    '$($cwaClientId)',
+#    '$($pickupGroupObj.Extension)',
+#    '$($pickupGroupObj.Type)',
+#    '$($pickupGroupObj.Groups)'
+# );
 
-UPDATE plugin_rader_ratel_device 
-SET is_sync_scheduled=1 
-WHERE client_id='$($cwaClientId)' AND extension_number='$($pickupGroupObj.Extension)';
-"@
+# UPDATE plugin_rader_ratel_device 
+# SET is_sync_scheduled=1 
+# WHERE client_id='$($cwaClientId)' AND extension_number='$($pickupGroupObj.Extension)';
+# "@
 
     }
     $body = @{"Results" = "PickupGroup modifications stored in database" }
