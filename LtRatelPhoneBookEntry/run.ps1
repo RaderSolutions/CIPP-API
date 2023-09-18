@@ -11,6 +11,7 @@ Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:Lt
 # get cwm id
 $TenantFilter = $Request.Query.TenantFilter
 write-host $Request.Query.TenantFilter
+write-host $Request.Query.FirstName
 
 $cwaClientId = Get-LabtechClientId($TenantFilter)
 write-host $cwaClientId
