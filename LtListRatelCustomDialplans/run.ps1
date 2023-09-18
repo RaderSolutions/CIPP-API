@@ -19,10 +19,10 @@ if ($Request.Query.Extension -and $Request.Query.Type) {
     $Type = $Request.Query.Type
     $table = Invoke-SqlQuery -Query "SELECT id, client_id, dialplan_name, dialplan_data, description FROM labtech.plugin_rader_ratel_custom_dialplan WHERE client_id=$cwaClientId" -AsDataTable 
 }
-# else {
-#     $table = Invoke-SqlQuery -Query "SELECT id, client_id, dialplan_name, dialplan_data, description FROM plugin_rader_ratel_custom_dialplan WHERE client_id=$cwaClientId GROUP BY extension,membership_type
-# " -AsDataTable 
-# }
+else {
+    $table = Invoke-SqlQuery -Query "SELECT id, client_id, dialplan_name, dialplan_data, description FROM plugin_rader_ratel_custom_dialplan WHERE client_id=$cwaClientId GROUP BY extension,membership_type
+" -AsDataTable 
+}
 $data = $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors
 Close-SqlConnection
 
