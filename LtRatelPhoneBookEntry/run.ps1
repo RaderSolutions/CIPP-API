@@ -10,6 +10,7 @@ Import-Module SimplySql
 Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:LtUser -Password $ENV:LtPass -Port 3306
 # get cwm id
 $TenantFilter = $Request.Query.TenantFilter
+write-host $Request.Query
 write-host "Request Query: $Request.Query"
 write-host " TenantFilter: $TenantFilter"
 $cwaClientId = Get-LabtechClientId($TenantFilter)
