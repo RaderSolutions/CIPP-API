@@ -25,15 +25,17 @@ else {
 }
 $data = $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors
 Close-SqlConnection
-
+write-host $data
 $dataArray = @()
 $result
 
 if ($data.count -eq 1 -and $null -eq $extension) { 
     $dataArray += $data
     $result = $dataArray
+    write-host "if result $result"
 }
 else { 
+    write-host "else result $result"
     $result = $data | convertto-json
 }
 
