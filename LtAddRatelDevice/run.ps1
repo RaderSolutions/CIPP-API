@@ -18,8 +18,8 @@ try {
     $TenantFilter = $deviceobj.tenantID
     write-host $TenantFilter
     $cwaClientId = Get-LabtechClientId($TenantFilter)
-    write-host $cwaClientId
-    write-host $deviceobj.DeviceType
+    write-host 'req body'
+    write-host $deviceobj
     if ($deviceobj.DeviceType -eq "User") { 
         # add device to LT database
         write-host "user device"
