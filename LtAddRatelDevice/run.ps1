@@ -22,45 +22,48 @@ try {
     write-host $deviceobj.DeviceType
     if ($deviceobj.DeviceType -eq "User") { 
         # add device to LT database
-        Invoke-SqlQuery -Query "INSERT INTO plugin_rader_ratel_device 
-        (mac_address, 
-         label,
-         email_address,
-         sip_password,
-         is_hidden_in_phonebook,
-         dialplan,
-         extension_number, 
-         contact_id, 
-         product_id, 
-         client_id, 
-         location_id,
-         fop_group,
-         is_sync_scheduled) 
-      VALUES ('$($deviceobj.MACAddress)', 
-            '',
-            '',
-            '',
-            0,
-            '',
-            '$($deviceobj.ExtensionNumber)', 
-            '$($deviceobj.ContactID)', 
-            '$($deviceobj.ProductID)', 
-            '$cwaClientId',
-            $($deviceobj.LocationID), 
-            '$($deviceobj.FOPGroup)',
-            1)
-      ON DUPLICATE KEY UPDATE extension_number='$($deviceobj.ExtensionNumber)',
-        label = '',
-        dialplan = '',
-        email_address = '',
-        sip_password = '',
-        is_hidden_in_phonebook = 0,
-         contact_id='$($deviceobj.ContactID)',
-         product_id='$($deviceobj.ProductID)',
-         client_id='$cwaClientId',
-         location_id='$($deviceobj.LocationID)',
-         fop_group='$($deviceobj.FOPGroup)',
-         is_sync_scheduled=1;"
+        write-host "user device"
+        write-host $cwaClientId
+        write-host $deviceobj.DeviceType
+    #     Invoke-SqlQuery -Query "INSERT INTO plugin_rader_ratel_device 
+    #     (mac_address, 
+    #      label,
+    #      email_address,
+    #      sip_password,
+    #      is_hidden_in_phonebook,
+    #      dialplan,
+    #      extension_number, 
+    #      contact_id, 
+    #      product_id, 
+    #      client_id, 
+    #      location_id,
+    #      fop_group,
+    #      is_sync_scheduled) 
+    #   VALUES ('$($deviceobj.MACAddress)', 
+    #         '',
+    #         '',
+    #         '',
+    #         0,
+    #         '',
+    #         '$($deviceobj.ExtensionNumber)', 
+    #         '$($deviceobj.ContactID)', 
+    #         '$($deviceobj.ProductID)', 
+    #         '$cwaClientId',
+    #         $($deviceobj.LocationID), 
+    #         '$($deviceobj.FOPGroup)',
+    #         1)
+    #   ON DUPLICATE KEY UPDATE extension_number='$($deviceobj.ExtensionNumber)',
+    #     label = '',
+    #     dialplan = '',
+    #     email_address = '',
+    #     sip_password = '',
+    #     is_hidden_in_phonebook = 0,
+    #      contact_id='$($deviceobj.ContactID)',
+    #      product_id='$($deviceobj.ProductID)',
+    #      client_id='$cwaClientId',
+    #      location_id='$($deviceobj.LocationID)',
+    #      fop_group='$($deviceobj.FOPGroup)',
+    #      is_sync_scheduled=1;"
     }
     else {
         # generic device
