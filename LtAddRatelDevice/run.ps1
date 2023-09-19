@@ -85,12 +85,12 @@ try {
         '$($deviceobj.ExtensionNumber)', 
         '$($deviceobj.Label)', 
         '$($deviceobj.EmailAddress)', 
-        $($deviceobj.ProductId), 
+        '$($deviceobj.ProductId)', 
         '$cwaClientId', 
-        $($deviceobj.LocationId), 
+        '$($deviceobj.LocationId)', 
         '$($deviceobj.FopGroup)',
         1, 
-        $($deviceobj.hideFromPhonebook))
+        '$($deviceobj.hideFromPhonebook)')
     ON DUPLICATE KEY UPDATE extension_number='$($deviceobj.ExtensionNumber)',
          label='$($deviceobj.Label)',
          email_address='$($deviceobj.EmailAddress)',
