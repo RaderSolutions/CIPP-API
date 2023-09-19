@@ -36,7 +36,7 @@ try {
          location_id,
          fop_group,
          is_sync_scheduled) 
-    VALUES ('$($deviceobj.MACAddress)', 
+      VALUES ('$($deviceobj.MACAddress)', 
             '',
             '',
             '',
@@ -49,7 +49,7 @@ try {
             $($deviceobj.LocationID), 
             '$($deviceobj.FOPGroup)',
             1)
-    ON DUPLICATE KEY UPDATE extension_number='$($deviceobj.ExtensionNumber)',
+      ON DUPLICATE KEY UPDATE extension_number='$($deviceobj.ExtensionNumber)',
         label = '',
         dialplan = '',
         email_address = '',
@@ -64,36 +64,38 @@ try {
     }
     else {
         # generic device
-        Invoke-SqlQuery -Query "INSERT INTO plugin_rader_ratel_device 	
-        (mac_address, 
-        extension_number, 
-        label, 
-        email_address, 
-        product_id, 
-        client_id, 
-        location_id,
-        fop_group,
-        is_sync_scheduled,
-        is_hidden_in_phonebook) 
-    VALUES ('$($deviceobj.macaddress)', 
-        '$($deviceobj.extensionNumber)', 
-        '$($deviceobj.label)', 
-        '$($deviceobj.emailAddress)', 
-        $($deviceobj.productId), 
-        '$cwaClientId', 
-        $($deviceobj.locationId), 
-        '$($deviceobj.fopGroup)',
-        1, 
-        $($deviceobj.hideFromPhonebook))
-    ON DUPLICATE KEY UPDATE extension_number='$($deviceobj.ExtensionNumber)',
-         label='$($deviceobj.label)',
-         email_address='$($deviceobj.emailAddress)',
-         product_id='$($deviceobj.productId)',
-         client_id='$cwaClientId',
-         location_id='$($deviceobj.locationId)',
-         fop_group='$($deviceobj.fopGroup)',
-         is_sync_scheduled=1,
-        is_hidden_in_phonebook='$($deviceobj.hideFromPhonebook)';"
+        write-host "generic device"
+        write-host $cwaClientId
+    #     Invoke-SqlQuery -Query "INSERT INTO plugin_rader_ratel_device 	
+    #     (mac_address, 
+    #     extension_number, 
+    #     label, 
+    #     email_address, 
+    #     product_id, 
+    #     client_id, 
+    #     location_id,
+    #     fop_group,
+    #     is_sync_scheduled,
+    #     is_hidden_in_phonebook) 
+    # VALUES ('$($deviceobj.macaddress)', 
+    #     '$($deviceobj.extensionNumber)', 
+    #     '$($deviceobj.label)', 
+    #     '$($deviceobj.emailAddress)', 
+    #     $($deviceobj.productId), 
+    #     '$cwaClientId', 
+    #     $($deviceobj.locationId), 
+    #     '$($deviceobj.fopGroup)',
+    #     1, 
+    #     $($deviceobj.hideFromPhonebook))
+    # ON DUPLICATE KEY UPDATE extension_number='$($deviceobj.ExtensionNumber)',
+    #      label='$($deviceobj.label)',
+    #      email_address='$($deviceobj.emailAddress)',
+    #      product_id='$($deviceobj.productId)',
+    #      client_id='$cwaClientId',
+    #      location_id='$($deviceobj.locationId)',
+    #      fop_group='$($deviceobj.fopGroup)',
+    #      is_sync_scheduled=1,
+    #     is_hidden_in_phonebook='$($deviceobj.hideFromPhonebook)';"
     }
     #schedule script to update ratel server Run the Pending Device Script to push to Server'); RaTel 2.0 - Add Outstanding Extensions to System
     # $ratelServer = Get-LabtechServerId($cwaClientId)
