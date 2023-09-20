@@ -50,7 +50,7 @@ try {
             '$($deviceobj.ContactId)', 
             '$($deviceobj.ProductId)', 
             '$cwaClientId',
-            $($deviceobj.LocationId), 
+            '$($deviceobj.LocationId)', 
             '$($deviceobj.FOPGroup)',
             1)
       ON DUPLICATE KEY UPDATE extension_number='$($deviceobj.ExtensionNumber)',
