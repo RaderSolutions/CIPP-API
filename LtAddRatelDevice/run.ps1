@@ -47,10 +47,10 @@ try {
             0,
             '',
             '$($deviceobj.ExtensionNumber)', 
-            '$($deviceobj.ContactID)', 
-            '$($deviceobj.ProductID)', 
+            '$($deviceobj.ContactId)', 
+            '$($deviceobj.ProductId)', 
             '$cwaClientId',
-            $($deviceobj.LocationID), 
+            $($deviceobj.LocationId), 
             '$($deviceobj.FOPGroup)',
             1)
       ON DUPLICATE KEY UPDATE extension_number='$($deviceobj.ExtensionNumber)',
@@ -59,10 +59,10 @@ try {
         email_address = '',
         sip_password = '',
         is_hidden_in_phonebook = 0,
-         contact_id='$($deviceobj.ContactID)',
-         product_id='$($deviceobj.ProductID)',
+         contact_id='$($deviceobj.ContactId)',
+         product_id='$($deviceobj.ProductId)',
          client_id='$cwaClientId',
-         location_id='$($deviceobj.LocationID)',
+         location_id='$($deviceobj.LocationId)',
          fop_group='$($deviceobj.FOPGroup)',
          is_sync_scheduled=1;"
     }
