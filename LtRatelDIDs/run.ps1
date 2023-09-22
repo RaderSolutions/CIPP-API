@@ -8,7 +8,8 @@ Write-Host "PowerShell HTTP trigger function processed a request."
 Import-Module SimplySql
 Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:LtUser -Password $ENV:LtPass -Port 3306
 # get cwm id
-$TenantFilter = $Request.Query.TenantFilter
+# $TenantFilter = $Request.Query.TenantFilter
+TenantFilter = $Request.body.TenantFilter
 $cwaClientId = Get-LabtechClientId($TenantFilter)
 # Get Automate Auth Token
 $null = Connect-AzAccount -Identity
