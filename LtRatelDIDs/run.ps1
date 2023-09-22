@@ -43,25 +43,25 @@ try {
     else { 
         $didobj = $Request.body
         write-host "add entry client id: $cwaClientId"
-        # Invoke-SqlQuery -Query "INSERT INTO plugin_rader_ratel_did (number, device_id, is_device_callerid, is_sync_scheduled, client_id, custom_dialplan) VALUES ($($didobj.Number), $($didobj.DeviceId), $($didobj.SetCallerId), 1, $cwaClientId, "") ON DUPLICATE KEY UPDATE device_id=$($didobj.DeviceId), is_device_callerid=$($didobj.SetCallerId), is_sync_scheduled=1, client_id=$cwaClientId, custom_dialplan="";"
-        # $scriptBody = @{ 
-        #     EntityType         = 1
-        #     EntityIds          = @($ratelServer)
-        #     ScriptId           = 7353
-        #     Schedule           = @{
-        #         ScriptScheduleFrequency = @{ 
-        #             ScriptScheduleFrequencyId = 1
-        #         }
-        #     }
-        #     UseAgentTime       = $False 
-        #     StartDate          = $date
-        #     OfflineActionFlags = @{
-        #         SkipOfflineAgents = $True
-        #     }
-        #     Priority           = 12
-        # } | ConvertTo-json
+        Invoke-SqlQuery -Query "INSERT INTO plugin_rader_ratel_did (number, device_id, is_device_callerid, is_sync_scheduled, client_id, custom_dialplan) VALUES ($($didobj.DidNumber), $($didobj.DeviceId), $($didobj.IsDeviceCallerId), 1, $cwaClientId, "") ON DUPLICATE KEY UPDATE device_id=$($didobj.DeviceId), is_device_callerid=$($didobj.SetCallerId), is_sync_scheduled=1, client_id=$cwaClientId, custom_dialplan="";"
+        $scriptBody = @{ 
+            EntityType         = 1
+            EntityIds          = @($ratelServer)
+            ScriptId           = 7353
+            Schedule           = @{
+                ScriptScheduleFrequency = @{ 
+                    ScriptScheduleFrequencyId = 1
+                }
+            }
+            UseAgentTime       = $False 
+            StartDate          = $date
+            OfflineActionFlags = @{
+                SkipOfflineAgents = $True
+            }
+            Priority           = 12
+        } | ConvertTo-json
     }
-    #schedule script to update ratel server
+    # schedule script to update ratel server
     # $ratelServer = Get-LabtechServerId($cwaClientId)
     # $date = Get-Date -Format "o"
     # write-host $scriptBody
