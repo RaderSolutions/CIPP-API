@@ -15,7 +15,8 @@ $null = Connect-AzAccount -Identity
 # $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
 try {
     if ($Request.Query.Action -eq "Delete") { 
-        Invoke-SqlQuery -Query "DELETE from plugin_rader_ratel_did WHERE number=$($Request.Query.DIDNumber) AND client_id=$cwaClientId LIMIT 1;"
+        write-host "delete entry client id: $cwaClientId"
+        # Invoke-SqlQuery -Query "DELETE from plugin_rader_ratel_did WHERE number=$($Request.Query.DIDNumber) AND client_id=$cwaClientId LIMIT 1;"
         # $scriptBody = @{ 
         #     EntityType         = 1
         #     EntityIds          = @($ratelServer)
