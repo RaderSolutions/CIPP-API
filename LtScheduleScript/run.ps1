@@ -38,7 +38,7 @@ if($Request.Query.RatelScript -eq "true"){
 
     $targetType =1
 
-}else { 
+} else { 
     $entity = $scriptobj.targetName
     $script = $scriptobj.ltscriptId
     $parameters = $scriptobj.jsonFormValues
