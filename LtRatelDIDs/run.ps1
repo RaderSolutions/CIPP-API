@@ -70,7 +70,7 @@ try {
         write-host "add entry client id: $cwaClientId"
         write-host "did: $($didobj.DidNumber)"
         Invoke-SqlQuery -Query @"
-        INSERT INTO plugin_rader_ratel_did (
+        INSERT INTO labtech.plugin_rader_ratel_did (
             number,
             device_id,
             is_device_callerid,
