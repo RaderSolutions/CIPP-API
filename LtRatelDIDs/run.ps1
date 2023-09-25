@@ -60,8 +60,8 @@ try {
           Invoke-SqlQuery Query @"
             PRINT (
                 '$($didobj.Extension)',
-                #             '$($didobj.Did)',
-                #               '$cwaClientId'
+                '$($didobj.Did)',
+                '$cwaClientId'
             )
 "@
     }
