@@ -42,6 +42,7 @@ try {
     } elseif ($Request.body.DidType -eq "ConferenceBridge") {
         $didobj = $Request.body
         write-host "conf bridge client id: $cwaClientId"
+        
 #         Invoke-SqlQuery -Query @"
 #         INSERT INTO plugin_rader_ratel_confbridge (
 #             confbridge_number,
@@ -56,6 +57,13 @@ try {
 #             confbridge_number=%input_confbridge%,
 #             did=%input_confdid%;
 # "@
+          Invoke-SqlQuery Query @"
+            PRINT (
+                '$($didobj.Extension)',
+                #             '$($didobj.Did)',
+                #               '$cwaClientId'
+            )
+"@
     }
     else { 
         $didobj = $Request.body
