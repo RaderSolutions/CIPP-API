@@ -83,7 +83,7 @@ INSERT INTO labtech.plugin_rader_ratel_did (
             '$($didobj.IsDeviceCallerId)',
             1,
             '$cwaClientId',
-            ""
+            '$($didobj.Dialplan))'
         ) ON DUPLICATE KEY UPDATE
             device_id='$($didobj.DeviceId)',
             is_device_callerid='$($didobj.SetCallerId)',
