@@ -42,7 +42,8 @@ try {
     } elseif ($Request.body.DidType -eq "ConferenceBridge") {
         $didobj = $Request.body
         write-host "conf bridge client id: $cwaClientId"
-        
+        write-host "did: $($didobj.DidNumber)"
+        write-host "conf bridge: $($didobj.Extension)"
         Invoke-SqlQuery -Query @"
         INSERT INTO plugin_rader_ratel_confbridge (
             confbridge_number,
@@ -54,8 +55,8 @@ try {
               '$cwaClientId'
               )
         ON DUPLICATE KEY UPDATE
-            confbridge_number=%input_confbridge%,
-            did=%input_confdid%;
+            confbridge_number='$($didobj.Extension)',
+            did='$($didobj.DidNumber)',;
 "@
 #           Invoke-SqlQuery Query @"
 #             PRINT (
