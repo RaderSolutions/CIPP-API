@@ -24,21 +24,21 @@ try {
         write-host "extension: $($Request.body.extension)"
         write-host "type: $($Request.body.type)"
         write-host "groups: $($Request.body.groups)"
-#      $pickupGroupObj = $Request.body
-# Invoke-SqlQuery -Query @"
-# INSERT INTO plugin_rader_ratel_pickupgroups 
-# (client_id, extension, membership_type, group_name) 
-# VALUES (
-#    '$($cwaClientId)',
-#    '$($pickupGroupObj.Extension)',
-#    '$($pickupGroupObj.Type)',
-#    '$($pickupGroupObj.Groups)'
-# );
+     $pickupGroupObj = $Request.body
+        Invoke-SqlQuery -Query @"
+        INSERT INTO labtech.plugin_rader_ratel_pickupgroups 
+        (client_id, extension, membership_type, group_name) 
+        VALUES (
+        '$($cwaClientId)',
+        '$($pickupGroupObj.Extension)',
+        '$($pickupGroupObj.Type)',
+        '$($pickupGroupObj.Groups)'
+        );
 
-# UPDATE plugin_rader_ratel_device 
-# SET is_sync_scheduled=1 
-# WHERE client_id='$($cwaClientId)' AND extension_number='$($pickupGroupObj.Extension)';
-# "@
+        UPDATE labtech.plugin_rader_ratel_device 
+        SET is_sync_scheduled=1 
+        WHERE client_id='$($cwaClientId)' AND extension_number='$($pickupGroupObj.Extension)';
+"@
 
     }
     $body = @{"Results" = "PickupGroup modifications stored in database" }
