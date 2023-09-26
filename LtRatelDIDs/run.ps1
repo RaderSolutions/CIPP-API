@@ -43,34 +43,34 @@ try {
         $didobj = $Request.body
         write-host "conf bridge client id: $cwaClientId"
         
-#         Invoke-SqlQuery -Query @"
-#         INSERT INTO plugin_rader_ratel_confbridge (
-#             confbridge_number,
-#             did,
-#             customer_id )
-#         VALUES (
-#             '$($didobj.Extension)',
-#             '$($didobj.Did)',
-#               '$cwaClientId'
-#               )
-#         ON DUPLICATE KEY UPDATE
-#             confbridge_number=%input_confbridge%,
-#             did=%input_confdid%;
-# "@
-          Invoke-SqlQuery Query @"
-            PRINT (
-                '$($didobj.Extension)',
-                '$($didobj.Did)',
-                '$cwaClientId'
-            )
+        Invoke-SqlQuery -Query @"
+        INSERT INTO plugin_rader_ratel_confbridge (
+            confbridge_number,
+            did,
+            customer_id )
+        VALUES (
+            '$($didobj.Extension)',
+            '$($didobj.DidNumber)',
+              '$cwaClientId'
+              )
+        ON DUPLICATE KEY UPDATE
+            confbridge_number=%input_confbridge%,
+            did=%input_confdid%;
 "@
-    }
+#           Invoke-SqlQuery Query @"
+#             PRINT (
+#                 '$($didobj.Extension)',
+#                 '$($didobj.Did)',
+#                 '$cwaClientId'
+#             )
+# "@
+    } 
     else { 
         $didobj = $Request.body
         write-host "add entry client id: $cwaClientId"
         write-host "did: $($didobj.DidNumber)"
         Invoke-SqlQuery -Query @"
-INSERT INTO labtech.plugin_rader_ratel_did (
+        INSERT INTO labtech.plugin_rader_ratel_did (
             number,
             device_id,
             is_device_callerid,
@@ -83,7 +83,7 @@ INSERT INTO labtech.plugin_rader_ratel_did (
             '$($didobj.IsDeviceCallerId)',
             1,
             '$cwaClientId',
-            '$($didobj.Dialplan))'
+            ""
         ) ON DUPLICATE KEY UPDATE
             device_id='$($didobj.DeviceId)',
             is_device_callerid='$($didobj.SetCallerId)',
