@@ -22,6 +22,8 @@ try {
     else { 
         write-host "add entry client id: $cwaClientId"
         write-host "extension: $($Request.body.extension)"
+        write-host "type: $($Request.body.type)"
+        write-host "groups: $($Request.body.groups)"
 #      $pickupGroupObj = $Request.body
 # Invoke-SqlQuery -Query @"
 # INSERT INTO plugin_rader_ratel_pickupgroups 
