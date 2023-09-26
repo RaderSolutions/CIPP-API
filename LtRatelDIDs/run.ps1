@@ -45,7 +45,7 @@ try {
         write-host "did: $($didobj.DidNumber)"
         write-host "conf bridge: $($didobj.Extension)"
         Invoke-SqlQuery -Query @"
-        INSERT INTO plugin_rader_ratel_confbridge (
+        INSERT INTO labtech.plugin_rader_ratel_confbridge (
             confbridge_number,
             did,
             customer_id )
@@ -56,7 +56,7 @@ try {
               )
         ON DUPLICATE KEY UPDATE
             confbridge_number='$($didobj.Extension)',
-            did='$($didobj.DidNumber)',;
+            did='$($didobj.DidNumber)';
 "@
 #           Invoke-SqlQuery Query @"
 #             PRINT (
