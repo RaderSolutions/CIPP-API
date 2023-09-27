@@ -15,7 +15,7 @@ write-host "cwaClientId $cwaClientId"
 $null = Connect-AzAccount -Identity
 # $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
 try {
-    if ($Request.Query.Action -eq "Delete") {
+    if ($Request.body.Action -eq "Delete") {
         $TenantFilter = $Request.Query.TenantFilter
         $cwaClientId = Get-LabtechClientId($TenantFilter)
         $reqObj = $Request.Query | ConvertTo-Json
