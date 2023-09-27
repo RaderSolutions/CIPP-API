@@ -21,7 +21,9 @@ try {
         write-host "delete entry type: $($Request.Query.Parameters.Type)"
         write-host "delete entry groups: $($Request.Query.Parameters.Groups)"
         write-host "request query: $($Request.Query)"
-        write-host "request query json $($Request.Query | convertto-json)"
+        $reqObj = $($Request.Query | convertto-json)
+        write-host "reqObj: $reqObj.parameters.Extension"
+
         # Invoke-SqlQuery -Query "DELETE FROM labtech.plugin_rader_ratel_pickupgroups WHERE client_id='$cwaClientId' AND extension='$($Request.Query.Extension)' AND membership_type='$($Request.Query.Type)' AND group_name='$($Request.Query.Groups)' LIMIT 1; UPDATE labtech.plugin_rader_ratel_device SET is_sync_scheduled=1 WHERE client_id='$cwaClientId' AND extension_number='$($Request.Query.Extension)';"
 } elseif ($Request.body.Action -eq "Edit") {
         $pickupGroupObj = $Request.body
