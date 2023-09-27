@@ -18,9 +18,9 @@ try {
     if ($Request.Query.Action -eq "Delete") {
         $TenantFilter = $Request.Query.TenantFilter
         $cwaClientId = Get-LabtechClientId($TenantFilter)
-        $extension = $Request.Query.Parameters.QueryString["extension"]
-        $type = $Request.Query.Parameters.QueryString["type"]
-        $groups = $Request.Query.Parameters.QueryString["groups"]
+        $extension = $Request.Query.QueryString["extension"]
+        $type = $Request.Query.QueryString["type"]
+        $groups = $Request.Query.QueryString["groups"]
         Write-Host "Extension: $extension"
         Write-Host "Type: $type"
         Write-Host "Groups: $groups"
