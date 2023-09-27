@@ -18,6 +18,20 @@ try {
     if ($Request.Query.Action -eq "Delete") { 
         Invoke-SqlQuery -Query "DELETE FROM plugin_rader_ratel_pickupgroups WHERE client_id=$cwaClientId AND extension=$($Request.Query.Extension) AND membership_type=$($Request.Query.Type) AND group_name=$($Request.Query.Groups) LIMIT 1;
         UPDATE plugin_rader_ratel_device SET is_sync_scheduled=1 WHERE client_id=$cwaClientId AND extension_number=$($Request.Query.Extension);"
+    } elseif ($Request.body.Action -eq "Edit") {
+        $pickupGroupObj = $Request.body
+        write-host "edit entry row id: $($pickupGroupObj.ID)"
+#         Invoke-SqlQuery -Query @"
+#         UPDATE plugin_rader_ratel_pickupgroups 
+#         SET (group_name, membership_type, extension)
+#         = (
+#         '$($pickupGroupObj.Groups)',
+#         '$($pickupGroupObj.Type)',
+#         '$($pickupGroupObj.Extension)'
+#         )
+#         WHERE id='$($pickupGroupObj.ID)' AND client_id=$cwaClientId LIMIT 1;
+#         UPDATE plugin_rader_ratel_device SET is_sync_scheduled=1 WHERE client_id=$cwaClientId AND extension_number=$($pickupGroupObj.Extension);
+# "@
     }
     else { 
         write-host "add entry client id: $cwaClientId"
