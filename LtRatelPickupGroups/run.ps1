@@ -8,6 +8,9 @@ Write-Host "PowerShell HTTP trigger function processed a request."
 Import-Module SimplySql
 Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:LtUser -Password $ENV:LtPass -Port 3306
 # get cwm id
+write-host "request body: "
+write-host $Request.body 
+write-host $Request.body | ConvertTo-Json
 $TenantFilter = $Request.body.TenantFilter
 $cwaClientId = Get-LabtechClientId($TenantFilter)
 write-host "cwaClientId $cwaClientId"
