@@ -17,28 +17,28 @@ $null = Connect-AzAccount -Identity
 try {
     if ($Request.Query.Action -eq "Delete") { 
         write-host "delete entry client id: $cwaClientId"
-        # Invoke-SqlQuery -Query "DELETE from plugin_rader_ratel_did WHERE number=$($Request.Query.DIDNumber) AND client_id=$cwaClientId LIMIT 1;"
-        # $scriptBody = @{ 
-        #     EntityType         = 1
-        #     EntityIds          = @($ratelServer)
-        #     ScriptId           = "TODO: get script id"
-        #     Schedule           = @{
-        #         ScriptScheduleFrequency = @{ 
-        #             ScriptScheduleFrequencyId = 1
-        #         }
-        #     }
-        #     Parameters = @(
-        #         @{
-        #         Key = "TenDigitNumber"
-        #         value= $($Request.Query.DIDNumber)}
-        #     )
-        #     UseAgentTime       = $False 
-        #     StartDate          = $date
-        #     OfflineActionFlags = @{
-        #         SkipOfflineAgents = $True
-        #     }
-        #     Priority           = 12
-        # } | ConvertTo-json
+        Invoke-SqlQuery -Query "DELETE from labtech.plugin_rader_ratel_did WHERE number='$($Request.Query.DIDNumber)' AND client_id='$cwaClientId' LIMIT 1;"
+        $scriptBody = @{ 
+            EntityType         = 1
+            EntityIds          = @($ratelServer)
+            ScriptId           = "TODO: get script id"
+            Schedule           = @{
+                ScriptScheduleFrequency = @{ 
+                    ScriptScheduleFrequencyId = 1
+                }
+            }
+            Parameters = @(
+                @{
+                Key = "TenDigitNumber"
+                value= $($Request.Query.DIDNumber)}
+            )
+            UseAgentTime       = $False 
+            StartDate          = $date
+            OfflineActionFlags = @{
+                SkipOfflineAgents = $True
+            }
+            Priority           = 12
+        } | ConvertTo-json
     } elseif ($Request.body.DidType -eq "ConferenceBridge") {
         $didobj = $Request.body
         write-host "conf bridge client id: $cwaClientId"
@@ -58,13 +58,6 @@ try {
             confbridge_number='$($didobj.Extension)',
             did='$($didobj.DidNumber)';
 "@
-#           Invoke-SqlQuery Query @"
-#             PRINT (
-#                 '$($didobj.Extension)',
-#                 '$($didobj.Did)',
-#                 '$cwaClientId'
-#             )
-# "@
     } 
     else { 
         $didobj = $Request.body
