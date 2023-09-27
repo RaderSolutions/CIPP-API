@@ -18,7 +18,8 @@ try {
     if ($Request.Query.Action -eq "Delete") {
         $TenantFilter = $Request.Query.TenantFilter
         $cwaClientId = Get-LabtechClientId($TenantFilter)
-        $reqObj = $Request.Content | ConvertFrom-Json
+        $reqObj = $Request.Query | ConvertTo-Json
+        write-host $reqObj
 
         # Retrieve values from the JSON object
         $extension = $reqObj.Extension
