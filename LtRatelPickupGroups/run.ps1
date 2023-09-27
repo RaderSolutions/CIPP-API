@@ -17,9 +17,10 @@ $null = Connect-AzAccount -Identity
 try {
     if ($Request.Query.Action -eq "Delete") { 
      
-        $reqObj = $($Request.Query.Parameters | convertto-json)
+        $reqObj = $($Request.Query.Parameters)
         
         write-host "reqObj: $reqObj"
+        write-host $reqObj.Extension
 
         # Invoke-SqlQuery -Query "DELETE FROM labtech.plugin_rader_ratel_pickupgroups WHERE client_id='$cwaClientId' AND extension='$($Request.Query.Extension)' AND membership_type='$($Request.Query.Type)' AND group_name='$($Request.Query.Groups)' LIMIT 1; UPDATE labtech.plugin_rader_ratel_device SET is_sync_scheduled=1 WHERE client_id='$cwaClientId' AND extension_number='$($Request.Query.Extension)';"
     }
