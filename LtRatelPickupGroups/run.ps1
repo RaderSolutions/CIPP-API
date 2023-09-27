@@ -15,19 +15,18 @@ write-host "cwaClientId $cwaClientId"
 $null = Connect-AzAccount -Identity
 # $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
 try {
-    if ($Request.Query.Action -eq "Delete") { 
-     
-        $reqObj = $($Request.Query.Parameters)
+    if ($Request.Query.Action -eq "Delete") {
+        $reqObj =$Request.body
+        write-host "delete entry client id: $cwaClientId"
         
         write-host "reqObj: $reqObj"
-        write-host $reqObj.Extension
-
-        # Invoke-SqlQuery -Query "DELETE FROM labtech.plugin_rader_ratel_pickupgroups WHERE client_id='$cwaClientId' AND extension='$($Request.Query.Extension)' AND membership_type='$($Request.Query.Type)' AND group_name='$($Request.Query.Groups)' LIMIT 1; UPDATE labtech.plugin_rader_ratel_device SET is_sync_scheduled=1 WHERE client_id='$cwaClientId' AND extension_number='$($Request.Query.Extension)';"
+        write-host 
+        # write-host $reqObj.Extension
+        Invoke-SqlQuery -Query "DELETE FROM labtech.plugin_rader_ratel_pickupgroups WHERE client_id='$cwaClientId' AND extension='$($Request.Query.Extension)' AND membership_type='$($Request.Query.Type)' AND group_name='$($Request.Query.Groups)' LIMIT 1; UPDATE labtech.plugin_rader_ratel_device SET is_sync_scheduled=1 WHERE client_id='$cwaClientId' AND extension_number='$($Request.Query.Extension)';"
     }
     elseif ($Request.body.Action -eq "Edit") {
         $pickupGroupObj = $Request.body
-        write-host "edit entry row id: $($pickupGroupObj.ID)"
-        write-host "groups: $($pickupGroupObj.Groups)"
+        write-host ""
         Invoke-SqlQuery -Query @"
         UPDATE labtech.plugin_rader_ratel_pickupgroups 
         SET group_name = '$($pickupGroupObj.Groups)',
