@@ -18,6 +18,8 @@ try {
     if ($Request.Query.Action -eq "Delete") {
         $TenantFilter = $Request.Query.TenantFilter
         $cwaClientId = Get-LabtechClientId($TenantFilter)
+        $reqObj = $Request.Query | convertto-json
+        write-host "reqObj $reqObj"
         $extension = $Request.Query.QueryString["extension"]
         $type = $Request.Query.QueryString["type"]
         $groups = $Request.Query.QueryString["groups"]
