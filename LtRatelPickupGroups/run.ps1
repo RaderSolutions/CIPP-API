@@ -18,13 +18,14 @@ try {
     if ($Request.Query.Action -eq "Delete") {
         $TenantFilter = $Request.Query.TenantFilter
         $cwaClientId = Get-LabtechClientId($TenantFilter)
-        $reqObj =$Request.body
-        write-host "delete entry client id: $cwaClientId"
-        
-        write-host "reqObj: $reqObj"
-        write-host 
+        $extension = $Request.QueryString["extension"]
+        $type = $Request.QueryString["type"]
+        $groups = $Request.QueryString["groups"]
+        Write-Host "Extension: $extension"
+        Write-Host "Type: $type"
+        Write-Host "Groups: $groups"
         # write-host $reqObj.Extension
-        Invoke-SqlQuery -Query "DELETE FROM labtech.plugin_rader_ratel_pickupgroups WHERE client_id='$cwaClientId' AND extension='$($Request.Query.Extension)' AND membership_type='$($Request.Query.Type)' AND group_name='$($Request.Query.Groups)' LIMIT 1; UPDATE labtech.plugin_rader_ratel_device SET is_sync_scheduled=1 WHERE client_id='$cwaClientId' AND extension_number='$($Request.Query.Extension)';"
+        # Invoke-SqlQuery -Query "DELETE FROM labtech.plugin_rader_ratel_pickupgroups WHERE client_id='$cwaClientId' AND extension='$($Request.Query.Extension)' AND membership_type='$($Request.Query.Type)' AND group_name='$($Request.Query.Groups)' LIMIT 1; UPDATE labtech.plugin_rader_ratel_device SET is_sync_scheduled=1 WHERE client_id='$cwaClientId' AND extension_number='$($Request.Query.Extension)';"
     }
     elseif ($Request.body.Action -eq "Edit") {
         $pickupGroupObj = $Request.body
