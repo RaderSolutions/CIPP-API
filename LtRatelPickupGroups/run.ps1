@@ -16,8 +16,12 @@ $null = Connect-AzAccount -Identity
 # $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
 try {
     if ($Request.Query.Action -eq "Delete") { 
-        Invoke-SqlQuery -Query "DELETE FROM plugin_rader_ratel_pickupgroups WHERE client_id=$cwaClientId AND extension=$($Request.Query.Extension) AND membership_type=$($Request.Query.Type) AND group_name=$($Request.Query.Groups) LIMIT 1;
-        UPDATE plugin_rader_ratel_device SET is_sync_scheduled=1 WHERE client_id=$cwaClientId AND extension_number=$($Request.Query.Extension);"
+        write-host "delete entry row id: $($Request.Query.ID)"
+        write-host 
+        Invoke-SqlQuery -Query @"
+        DELETE FROM labtech.plugin_rader_ratel_pickupgroups WHERE client_id=$cwaClientId AND extension=$($Request.Query.Extension) AND membership_type=$($Request.Query.Type) AND group_name=$($Request.Query.Groups) LIMIT 1;
+        UPDATE labtech.plugin_rader_ratel_device SET is_sync_scheduled=1 WHERE client_id=$cwaClientId AND extension_number=$($Request.Query.Extension);
+@"
     } elseif ($Request.body.Action -eq "Edit") {
         $pickupGroupObj = $Request.body
         write-host "edit entry row id: $($pickupGroupObj.ID)"
