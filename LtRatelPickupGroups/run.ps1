@@ -20,7 +20,7 @@ try {
         $cwaClientId = Get-LabtechClientId($TenantFilter)
         $reqObj = $Request.Query | convertto-json
         write-host "reqObj $reqObj"
-        $extension = $reqObj.Extension
+        $extension = $request.Query.Extension
         $type = $reqObj.Type
         $groups = $reqObj.Groups
         Write-Host "Extension: $extension"
