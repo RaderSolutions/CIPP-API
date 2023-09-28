@@ -19,10 +19,11 @@ $null = Connect-AzAccount -Identity
 $entryObj = $Request.body
 write-host $cwaClientId
 try {
-    if ($Request.Query.Action -eq "Delete") { 
-        write-host "req action"
-        write-host $Request.Query.Action
-        write-host $Request.Query
+    if ($Request.body.Action -eq "Delete") { 
+        write-host "delete condition"
+        $ID = $Request.body.ID
+        write-host "client id: $cwaClientId"
+        Write-Host "ID: $ID"
 #         Invoke-SqlQuery -Query @"
 # DELETE FROM plugin_rader_ratel_external_contacts 
 # WHERE id=$($Request.Query.ID) AND client_id=$cwaClientId 
