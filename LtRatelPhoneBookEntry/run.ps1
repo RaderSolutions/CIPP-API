@@ -24,11 +24,12 @@ try {
         $ID = $Request.body.ID
         write-host "client id: $cwaClientId"
         Write-Host "ID: $ID"
-#         Invoke-SqlQuery -Query @"
-# DELETE FROM plugin_rader_ratel_external_contacts 
-# WHERE id=$($Request.Query.ID) AND client_id=$cwaClientId 
-# LIMIT 1;
-# "@
+        write-host "entryobj id: $($entryObj.ID)"
+        Invoke-SqlQuery -Query @"
+DELETE FROM labtech.plugin_rader_ratel_external_contacts 
+WHERE id='$($ID)' AND client_id='$cwaClientId'
+LIMIT 1;
+"@
     }
     if ($Request.Query.Action -eq "Update") { 
         Invoke-SqlQuery -Query @"
