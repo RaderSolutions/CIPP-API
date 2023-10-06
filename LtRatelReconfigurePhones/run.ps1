@@ -17,6 +17,7 @@ else {
 try { 
     $clientId = Get-LabtechClientId($Request.Query.TenantFilter)
     $ratelServer = Get-LabtechServerId($clientId)
+    write-host $ratelServer
     $date = Get-Date -Format "o"
     Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:LtUser -Password $ENV:LtPass -Port 3306
     Invoke-SqlQuery -Query "INSERT INTO commands 
