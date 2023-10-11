@@ -51,8 +51,8 @@ if($Request.Query.MailboxId){
     # " -AsDataTable 
 } else {
 $table = Invoke-SqlQuery -Query "SELECT
-plugin_rader_ratel_pagegroups.pagegroup_extension AS 'Extension',
-plugin_rader_ratel_pagegroups.pagegroup_name AS 'PageGroupName',
+plugin_rader_ratel_pagegroup_membership.pagegroup_extension AS 'Extension',
+plugin_rader_ratel_pagegroup_membership.pagegroup_name AS 'PageGroupName',
 plugin_rader_ratel_device.id AS 'DeviceId',
 plugin_rader_ratel_device.extension_number AS 'DeviceExt',
 COALESCE(CONCAT(contacts.FirstName,' ',contacts.LastName),plugin_rader_ratel_device.label) AS 'User',
