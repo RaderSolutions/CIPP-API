@@ -87,7 +87,7 @@ ORDER BY
 plugin_rader_ratel_pagegroups.pagegroup_name
 " -AsDataTable 
 }
-$pagingGroups= $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors
+$pagingGroups= $members | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors
 Close-SqlConnection
 
 $pagingGroupArray = @()
