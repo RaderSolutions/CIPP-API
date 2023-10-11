@@ -84,7 +84,7 @@ WHERE
 plugin_rader_ratel_pagegroups.client_id=$cwaClientId
 AND COALESCE(CONCAT(contacts.FirstName, ' ', contacts.LastName), plugin_rader_ratel_device.label) IS NOT NULL
 ORDER BY 
-plugin_rader_ratel_pagegroups.pagegroup_name
+    'Extension' ASC, 'DeviceExt' ASC;
 " -AsDataTable 
 }
 $pagingGroups= $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors
