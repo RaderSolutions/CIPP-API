@@ -82,12 +82,12 @@ ON
 locations.LocationID=plugin_rader_ratel_device.location_id
 WHERE 
 plugin_rader_ratel_pagegroups.client_id=$cwaClientId
-
+AND COALESCE(CONCAT(contacts.FirstName, ' ', contacts.LastName), plugin_rader_ratel_device.label) IS NOT NULL
 ORDER BY 
 plugin_rader_ratel_pagegroups.pagegroup_name
 " -AsDataTable 
 }
-$pagingGroups= $members | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors
+$pagingGroups= $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors
 Close-SqlConnection
 
 $pagingGroupArray = @()
