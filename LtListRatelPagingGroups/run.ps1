@@ -51,7 +51,7 @@ if($Request.Query.MailboxId){
     # " -AsDataTable 
 } else {
     $members = Invoke-SqlQuery -Query "SELECT
-    * FROM plugin_rader_ratel_pagegroup_membership
+    * FROM plugin_rader_ratel_pagegroups
     WHERE client_id=$cwaClientId" -AsDataTable
 
 $table = Invoke-SqlQuery -Query "SELECT
