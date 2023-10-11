@@ -58,10 +58,10 @@ plugin_rader_ratel_device.extension_number AS 'DeviceExt',
 COALESCE(CONCAT(contacts.FirstName,' ',contacts.LastName),plugin_rader_ratel_device.label) AS 'User',
 locations.Name AS 'Location',
 plugin_rader_ratel_pagegroups.hidden_from_phonebook as 'HideFromPB'
-FROM 
-plugin_rader_ratel_pagegroup_membership
-LEFT JOIN 
-plugin_rader_ratel_pagegroups
+# FROM 
+# plugin_rader_ratel_pagegroup_membership
+# LEFT JOIN 
+# plugin_rader_ratel_pagegroups
 ON
 plugin_rader_ratel_pagegroup_membership.pagegroup_id=plugin_rader_ratel_pagegroups.id
 LEFT JOIN
