@@ -50,9 +50,13 @@ if($Request.Query.MailboxId){
     # plugin_rader_ratel_pagegroups.pagegroup_name
     # " -AsDataTable 
 } else {
+    $members = Invoke-SqlQuery -Query "SELECT
+    * FROM plugin_rader_ratel_pagegroup_membership
+    WHERE client_id=$cwaClientId" -AsDataTable
+
 $table = Invoke-SqlQuery -Query "SELECT
-plugin_rader_ratel_pagegroup_membership.pagegroup_extension AS 'Extension',
-plugin_rader_ratel_pagegroup_membership.pagegroup_name AS 'PageGroupName',
+plugin_rader_ratel_pagegroups.pagegroup_extension AS 'Extension',
+plugin_rader_ratel_pagegroups.pagegroup_name AS 'PageGroupName',
 plugin_rader_ratel_device.id AS 'DeviceId',
 plugin_rader_ratel_device.extension_number AS 'DeviceExt',
 COALESCE(CONCAT(contacts.FirstName,' ',contacts.LastName),plugin_rader_ratel_device.label) AS 'User',
@@ -83,7 +87,7 @@ ORDER BY
 plugin_rader_ratel_pagegroups.pagegroup_name
 " -AsDataTable 
 }
-$pagingGroups= $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors
+$pagingGroups= $members | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors
 Close-SqlConnection
 
 $pagingGroupArray = @()
