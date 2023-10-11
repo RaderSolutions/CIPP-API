@@ -10,8 +10,9 @@ Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:Lt
 
 
 $table = Invoke-SqlQuery -Query "select id as 'modelId',CONCAT(manufacturer_name,' ', Model) as Name from plugin_rader_ratel_product ORDER BY ID;" -AsDataTable
+$allData = Invoke-SqlQuery -Query "select * from plugin_rader_ratel_product ORDER BY ID;" -AsDataTable
 # Associate values to output bindings by calling 'Push-OutputBinding'.
-$response = $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors | convertto-json
+$response = $allData | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors | convertto-json
 Close-SqlConnection
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
