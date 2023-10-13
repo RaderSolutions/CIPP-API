@@ -20,6 +20,10 @@ if($Request.Query.isProductTable){
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 $response = $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors | convertto-json
 Close-SqlConnection
+$response = $response | ForEach-Object {
+    $_.supports_lldp = $_.supports_lldp -eq 1
+    $_
+}
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
