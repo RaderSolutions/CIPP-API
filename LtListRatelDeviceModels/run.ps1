@@ -21,7 +21,11 @@ if($Request.Query.isProductTable){
 $response = $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors | convertto-json
 Close-SqlConnection
 $response = $response | ForEach-Object {
-    $_.supports_lldp = $_.supports_lldp -eq 1
+    if ($_.supports_lldp -eq 1) {
+        $_.supports_lldp = 'true'
+    } else {
+        $_.supports_lldp = 'false'
+    }
     $_
 }
 
