@@ -6,13 +6,15 @@ $currentUTCtime = (Get-Date).ToUniversalTime()
 $tst = Get-GraphToken
 $tst | convertto-json
 $Refreshtoken = (Get-GraphToken -ReturnRefresh $true).Refresh_token
-write-host $ENV:ApplicationID
 if ($env:MSI_SECRET) {
     Disable-AzContextAutosave -Scope Process | Out-Null
     $AzSession = Connect-AzAccount -Identity
 }
 
 $KV = 'cipphglzr'
+Connect-AzAccount -Identity
+$ENV:applicationid = (Get-AzKeyVaultSecret -VaultName $ENV:WEBSITE_DEPLOYMENT_ID -Name "ApplicationId" -AsPlainText)
+
 
 if ($Refreshtoken) { 
     Set-AzKeyVaultSecret -VaultName $kv -Name 'RefreshToken' -SecretValue (ConvertTo-SecureString -String $Refreshtoken -AsPlainText -Force)
