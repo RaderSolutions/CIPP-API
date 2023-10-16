@@ -6,7 +6,7 @@ $currentUTCtime = (Get-Date).ToUniversalTime()
 $tst = Get-GraphToken
 $tst | convertto-json
 $Refreshtoken = (Get-GraphToken -ReturnRefresh $true).Refresh_token
-
+write-host $ENV:ApplicationID
 if ($env:MSI_SECRET) {
     Disable-AzContextAutosave -Scope Process | Out-Null
     $AzSession = Connect-AzAccount -Identity
