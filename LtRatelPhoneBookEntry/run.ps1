@@ -52,28 +52,28 @@ LIMIT 1;
     }
     else { 
         write-host "add entry client id: $cwaClientId"
-#         Invoke-SqlQuery -Query @"
-# INSERT INTO labtech.plugin_rader_ratel_external_contacts (dial, prefix, first_name, second_name, last_name, suffix, primary_email, organization, job_title, location, notes, client_id, account_id, subscribe_to, custom_dial_action, contact_type, is_from_fop)
-# VALUES (
-#    '$($entryObj.Dial)',
-#    '$($entryObj.Salutation)',
-#    '$($entryObj.FirstName)',
-#    '$($entryObj.MiddleName)',
-#    '$($entryObj.LastName)',
-#    '$($entryObj.Suffix)',
-#    '$($entryObj.Email)',
-#    '$($entryObj.Organization)',
-#    '$($entryObj.JobTitle)',
-#    '$($entryObj.Location)',
-#    '$($entryObj.Notes)',
-#    '$($cwaClientId)',
-#         '',
-#         '',
-#         '',
-#    'sip',
-#    '0'
-#     );
-# "@
+        Invoke-SqlQuery -Query @"
+INSERT INTO labtech.plugin_rader_ratel_external_contacts (dial, prefix, first_name, second_name, last_name, suffix, primary_email, organization, job_title, location, notes, client_id, account_id, subscribe_to, custom_dial_action, contact_type, is_from_fop)
+VALUES (
+   '$($entryObj.Dial)',
+   '$($entryObj.Salutation)',
+   '$($entryObj.FirstName)',
+   '$($entryObj.MiddleName)',
+   '$($entryObj.LastName)',
+   '$($entryObj.Suffix)',
+   '$($entryObj.Email)',
+   '$($entryObj.Organization)',
+   '$($entryObj.JobTitle)',
+   '$($entryObj.Location)',
+   '$($entryObj.Notes)',
+   '$($cwaClientId)',
+        '',
+        '',
+        '',
+   'sip',
+   '0'
+    );
+"@
 
     }
     $body = @{"Results" = "Phonebook Entry modifications stored in database" }

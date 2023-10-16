@@ -18,14 +18,7 @@ if($Request.Query.isProductTable){
 
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
-$response = $response | ForEach-Object {
-    if ($_.supports_lldp -eq 1) {
-        $_.supports_lldp = 'true'
-    } else {
-        $_.supports_lldp = 'false'
-    }
-    $_
-}
+
 $response = $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors | convertto-json
 Close-SqlConnection
 write-host "response:"
