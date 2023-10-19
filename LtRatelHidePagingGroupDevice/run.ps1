@@ -47,7 +47,7 @@ locations
 ON 
 locations.LocationID=plugin_rader_ratel_device.location_id
 WHERE 
-plugin_rader_ratel_pagegroups.client_id=%clientid%
+plugin_rader_ratel_pagegroups.client_id='$cwaClientId'
 
 ORDER BY 
 plugin_rader_ratel_pagegroups.pagegroup_name
