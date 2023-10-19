@@ -54,6 +54,7 @@ if($Request.Query.DeviceID){
         plugin_rader_ratel_device.extension_number
 " -AsDataTable
 } else {
+    write-host "client id : $cwaClientId"
 $table = Invoke-SqlQuery -Query "SELECT 
         plugin_rader_ratel_device.id AS 'DeviceId',
         mac_address AS 'MacAddress', 

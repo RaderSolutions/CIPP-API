@@ -50,6 +50,7 @@ if($Request.Query.MailboxId){
     # plugin_rader_ratel_pagegroups.pagegroup_name
     # " -AsDataTable 
 } else {
+    write-host "client id : $cwaClientId"
     $members = Invoke-SqlQuery -Query "SELECT
     * FROM plugin_rader_ratel_pagegroups
     WHERE client_id=$cwaClientId" -AsDataTable
