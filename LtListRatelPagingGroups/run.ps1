@@ -82,7 +82,7 @@ locations
 ON 
 locations.LocationID=plugin_rader_ratel_device.location_id
 WHERE 
-plugin_rader_ratel_pagegroups.client_id=$cwaClientId
+plugin_rader_ratel_pagegroups.client_id='$cwaClientId'
 AND COALESCE(CONCAT(contacts.FirstName, ' ', contacts.LastName), plugin_rader_ratel_device.label) IS NOT NULL
 ORDER BY 
     'Extension' ASC, 'DeviceExt' ASC;
