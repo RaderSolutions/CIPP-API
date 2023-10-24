@@ -22,7 +22,7 @@ write-host 'entryObj/license'
 write-host $entryObj.LicenseKey
 try {
     Invoke-SqlQuery -Query @"
-    INSERT INTO labtech.plugin_rader_ratel_configuration (client_id,parameter,`value`) 
+    INSERT INTO labtech.plugin_rader_ratel_configuration (client_id,parameter,value) 
     VALUES ('$($cwaClientId)','dpma_license_key','$($Request.body.LicenseKey)') 
     ON DUPLICATE KEY UPDATE VALUE='$($Request.body.LicenseKey)'; 
 "@    
