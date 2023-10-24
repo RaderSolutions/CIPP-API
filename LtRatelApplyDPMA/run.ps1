@@ -21,11 +21,11 @@ write-host $cwaClientId
 write-host 'entryObj/license'
 write-host $entryObj.LicenseKey
 try {
-#     Invoke - SqlQuery - Query @"
-#     INSERT INTO plugin_rader_ratel_configuration (client_id,parameter,value) 
-#     VALUES ('$cwaClientId','dpma_license_key','$($entryObj.LicenseKey)') 
-#     ON DUPLICATE KEY UPDATE VALUE='$($entryObj.LicenseKey)'; 
-# "@    
+    Invoke - SqlQuery - Query @"
+    INSERT INTO plugin_rader_ratel_configuration (client_id,parameter,value) 
+    VALUES ('$cwaClientId','dpma_license_key','$($entryObj.LicenseKey)') 
+    ON DUPLICATE KEY UPDATE VALUE='$($entryObj.LicenseKey)'; 
+"@    
     $body = @{"Results" = "DPMA License Applied" }
 
 } 
