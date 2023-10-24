@@ -18,8 +18,8 @@ $null = Connect-AzAccount -Identity
 
 $entryObj = $Request.body
 write-host $cwaClientId
-write-host 'entryObj'
-write-host $entryObj
+write-host 'entryObj/license'
+write-host $entryObj.LicenseKey
 try {
 #     Invoke - SqlQuery - Query @"
 #     INSERT INTO plugin_rader_ratel_configuration (client_id,parameter,value) 
