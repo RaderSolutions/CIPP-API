@@ -18,6 +18,7 @@ $null = Connect-AzAccount -Identity
 
 $entryObj = $Request.body
 write-host $cwaClientId
+write-host 'entryObj'
 write-host $entryObj
 try {
 #     Invoke - SqlQuery - Query @"
