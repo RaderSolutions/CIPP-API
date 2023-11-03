@@ -83,6 +83,10 @@ try {
             Priority = 12
         } | ConvertTo-json -Depth 6
     }
+    $scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | convertto-json | out-string
+$body = @{"Results" = $scriptResult }
+$json = @{}
+$json.Add($body)
 }
 catch {
     write-host $_.Exception.Message
@@ -93,10 +97,7 @@ catch {
 
 write-host $scriptBody
 
-$scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | convertto-json | out-string
-$body = @{"Results" = $scriptResult }
-$json = @{}
-$json.Add("Data",$body)
+
 $result += $body
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
     StatusCode = [HttpStatusCode]::OK
