@@ -18,70 +18,78 @@ $scriptobj = $Request.body
 write-host $scriptobj
 $date = Get-Date -Format "o"
 $Request.Query | convertto-json
-if($Request.Query.RatelScript -eq "true"){
-    write-host "Ratel Script"
-    $clientid = Get-LabtechClientId($Request.Query.TenantFilter)
-    $entity = Get-LabtechServerId($clientid)
-    write-host $entity
-    $script = $request.Query.ScriptId
-    if($Request.Query.Parameters){ 
-        $parameters = @()
-        $Request.Query.Parameters.replace("|", "`n").split(",") | foreach { 
-            $parameter = ConvertFrom-StringData -StringData $_
-            $parameters += $parameter
-            write-host $parameters
+try {
+    if($Request.Query.RatelScript -eq "true"){
+        write-host "Ratel Script"
+        $clientid = Get-LabtechClientId($Request.Query.TenantFilter)
+        $entity = Get-LabtechServerId($clientid)
+        write-host $entity
+        $script = $request.Query.ScriptId
+        if($Request.Query.Parameters){ 
+            $parameters = @()
+            $Request.Query.Parameters.replace("|", "`n").split(",") | foreach { 
+                $parameter = ConvertFrom-StringData -StringData $_
+                $parameters += $parameter
+                write-host $parameters
+            }
+        } elseif ($scriptobj) {
+            #TODO: handle parameters sent from form
+            write-host $scriptobj
         }
-    } elseif ($scriptobj) {
-        #TODO: handle parameters sent from form
-        write-host $scriptobj
+    
+        $targetType =1
+    
+    } else { 
+        $entity = $scriptobj.targetName
+        $script = $scriptobj.ltscriptId
+        $parameters = $scriptobj.jsonFormValues
+        $targetType = $scriptobj.TargetType
     }
-
-    $targetType =1
-
-} else { 
-    $entity = $scriptobj.targetName
-    $script = $scriptobj.ltscriptId
-    $parameters = $scriptobj.jsonFormValues
-    $targetType = $scriptobj.TargetType
-}
-if($parameters){ 
-    $scriptBody= @{ 
-        EntityType = $targetType
-        EntityIds = @($entity)
-        ScriptId = $script
-        Schedule = @{
-            ScriptScheduleFrequency = @{ 
-                ScriptScheduleFrequencyId = 1
+    if($parameters){ 
+        $scriptBody= @{ 
+            EntityType = $targetType
+            EntityIds = @($entity)
+            ScriptId = $script
+            Schedule = @{
+                ScriptScheduleFrequency = @{ 
+                    ScriptScheduleFrequencyId = 1
+                }
             }
-        }
-        Parameters = @(
-            $parameters
-        )
-        UseAgentTime = $False 
-        StartDate = $date
-        OfflineActionFlags = @{
-            SkipOfflineAgents = $True
-        }
-        Priority = 12
-    } | ConvertTo-json -Depth 6
-} else { 
-    $scriptBody= @{ 
-        EntityType = $targetType
-        EntityIds = @($entity)
-        ScriptId = $script
-        Schedule = @{
-            ScriptScheduleFrequency = @{ 
-                ScriptScheduleFrequencyId = 1
+            Parameters = @(
+                $parameters
+            )
+            UseAgentTime = $False 
+            StartDate = $date
+            OfflineActionFlags = @{
+                SkipOfflineAgents = $True
             }
-        }
-        UseAgentTime = $False 
-        StartDate = $date
-        OfflineActionFlags = @{
-            SkipOfflineAgents = $True
-        }
-        Priority = 12
-    } | ConvertTo-json -Depth 6
+            Priority = 12
+        } | ConvertTo-json -Depth 6
+    } else { 
+        $scriptBody= @{ 
+            EntityType = $targetType
+            EntityIds = @($entity)
+            ScriptId = $script
+            Schedule = @{
+                ScriptScheduleFrequency = @{ 
+                    ScriptScheduleFrequencyId = 1
+                }
+            }
+            UseAgentTime = $False 
+            StartDate = $date
+            OfflineActionFlags = @{
+                SkipOfflineAgents = $True
+            }
+            Priority = 12
+        } | ConvertTo-json -Depth 6
+    }
 }
+catch {
+    write-host $_.Exception.Message
+    $body = @{"Results" = "Something went wrong." }
+    <#Do this if a terminating exception happens#>
+}
+
 
 write-host $scriptBody
 
