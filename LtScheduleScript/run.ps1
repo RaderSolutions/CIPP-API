@@ -15,7 +15,12 @@ $cwaHeaders.Add("Authorization", "Bearer $token")
 $cwaHeaders.Add("ClientId", $ENV:CwaClientId)
 $cwaHeaders.Add("Content-Type", "application/json")
 $scriptobj = $Request.body
+write-host 'request query'
+write-host $Request.Query
+write-host 'scriptobj'
 write-host $scriptobj
+write-host 'request'
+write-host $Request
 $date = Get-Date -Format "o"
 $Request.Query | convertto-json
 
