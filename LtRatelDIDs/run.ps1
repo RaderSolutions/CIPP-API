@@ -10,8 +10,13 @@ Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:Lt
 # get cwm id
 # $TenantFilter = $Request.Query.TenantFilter
 $TenantFilter = $Request.body.TenantFilter
+write-host "req body:"
+write-host $Request.body
+write-host "tenant filter:"
+write-host $TenantFilter
 $cwaClientId = Get-LabtechClientId($TenantFilter)
 write-host "cwaClientId $cwaClientId"
+write-host $cwaClientId
 # Get Automate Auth Token
 $null = Connect-AzAccount -Identity
 # $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
