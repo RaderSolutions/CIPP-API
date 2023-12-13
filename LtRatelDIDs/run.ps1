@@ -18,6 +18,7 @@ $null = Connect-AzAccount -Identity
 try {
     if ($Request.Query.Action -eq "Delete") { 
         write-host "delete entry client id: $cwaClientId"
+        write-host "$($cwaClientId)"
         # Invoke-SqlQuery -Query "DELETE from labtech.plugin_rader_ratel_did WHERE number='$($Request.Query.DIDNumber)' AND client_id='$($cwaClientId)' LIMIT 1;"
         $scriptBody = @{ 
             EntityType         = 1
