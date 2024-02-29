@@ -127,7 +127,7 @@ try {
     write-host $scriptBody
     $cwaHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $cwaHeaders.Add("Authorization", "Bearer $token")
-    $cwaHeaders.Add("ClientId", $cwaClientId)
+    $cwaHeaders.Add("ClientId", $ENV:CwaClientId)
     $cwaHeaders.Add("Content-Type", "application/json")
     $scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | ConvertTo-Json
    
