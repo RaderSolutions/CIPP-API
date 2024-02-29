@@ -105,22 +105,26 @@ try {
             ;
 
 "@
-        $scriptBody = @{ 
-            EntityType         = 1
-            EntityIds          = @($ratelServer)
-            ScriptId           = 7353
-            Schedule           = @{
-                ScriptScheduleFrequency = @{ 
-                    ScriptScheduleFrequencyId = 1
-                }
-            }
-            UseAgentTime       = $False 
-            StartDate          = $date
-            OfflineActionFlags = @{
-                SkipOfflineAgents = $True
-            }
-            Priority           = 12
-        } | ConvertTo-json
+        $didValue = $didobj.DidNumber
+        $dialplanValue = ""
+$scriptBody = @{
+    EntityType         = 1
+    EntityIds          = @(22903)
+    StartDate          = "2024-02-29T18:46:05.9651708+00:00"
+    UseAgentTime       = $false
+    Schedule           = @{
+        ScriptScheduleFrequency = @{ 
+            ScriptScheduleFrequencyId = 1
+        }
+    }
+    ScriptId           = 7353
+    Priority           = 12
+    OfflineActionFlags = @{
+        SkipOfflineAgents = $true
+    }
+    DID                = ($didValue -ne $null) ? $didValue : $null
+    Dialplan           = ($dialplanValue -ne $null) ? $dialplanValue : $null
+} | ConvertTo-Json | ConvertTo-json
     }
     # schedule script to update ratel server
     
