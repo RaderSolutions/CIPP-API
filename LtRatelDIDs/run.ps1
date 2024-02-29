@@ -24,13 +24,9 @@ write-host $TenantFilter
 $cwaClientId = Get-LabtechClientId($TenantFilter)
 write-host "cwaClientId $cwaClientId"
 write-host $cwaClientId
-$ratelServer = Get-LabtechServerId($cwaClientId)
-$date = Get-Date -Format "o"
-write-host "RATEL SERVER RETRIEVE"
-write-host $ratelServer
 # Get Automate Auth Token
 $null = Connect-AzAccount -Identity
-$token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
+# $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
 try {
     if ($Request.Query.Action -eq "Delete") { 
         write-host "delete entry client id: $cwaClientId"
@@ -105,48 +101,32 @@ try {
             ;
 
 "@
-        $didValue = $didobj.DidNumber
-        $dialplanValue = ""
-$scriptBody = @{
-    EntityType         = 1
-    EntityIds          = @(22903)
-    ScriptId           = 7353
-    Schedule           = @{
-        ScriptScheduleFrequency = @{ 
-            ScriptScheduleFrequencyId = 1
-        }
-    }
-    Parameters         = @(
-        @{
-            Name  = "DID"
-            Value = ($didValue -ne $null) ? $didValue : $null
-        },
-        @{
-            Name  = "Dialplan"
-            Value = ($dialplanValue -ne $null) ? $dialplanValue : $null
-        }
-    )
-    UseAgentTime       = $false
-    StartDate          = "2024-02-29T18:46:05.9651708+00:00"
-    OfflineActionFlags = @{
-        SkipOfflineAgents = $true
-    }
-    Priority           = 12
-} | ConvertTo-Json -Depth 6
-
+        $scriptBody = @{ 
+            EntityType         = 1
+            EntityIds          = @($ratelServer)
+            ScriptId           = 7353
+            Schedule           = @{
+                ScriptScheduleFrequency = @{ 
+                    ScriptScheduleFrequencyId = 1
+                }
+            }
+            UseAgentTime       = $False 
+            StartDate          = $date
+            OfflineActionFlags = @{
+                SkipOfflineAgents = $True
+            }
+            Priority           = 12
+        } | ConvertTo-json
     }
     # schedule script to update ratel server
-    
-    write-host $scriptBody
-    $cwaHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-    $cwaHeaders.Add("Authorization", "Bearer $token")
-    $cwaHeaders.Add("ClientId", $ENV:CwaClientId)
-    $cwaHeaders.Add("Content-Type", "application/json")
-    write-host "cwaHeaders"
-    write-host $cwaHeaders
-    $scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | ConvertTo-Json
-   write-host "SCRIPT RESULT"
-   write-host $scriptResult
+    # $ratelServer = Get-LabtechServerId($cwaClientId)
+    # $date = Get-Date -Format "o"
+    # write-host $scriptBody
+    # $cwaHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+    # $cwaHeaders.Add("Authorization", "Bearer $token")
+    # $cwaHeaders.Add("ClientId", $ENV:CwaClientId)
+    # $cwaHeaders.Add("Content-Type", "application/json")
+    # $scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | ConvertTo-Json
     $body = @{"Results" = "DID modifications stored in database" }
 
 } 
