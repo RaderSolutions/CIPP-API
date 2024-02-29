@@ -14,10 +14,7 @@ if ($Request.Query.TenantFilter) {
 } else {
     $TenantFilter = $Request.body.TenantFilter
 }
-$ratelServer = Get-LabtechServerId($cwaClientId)
-$date = Get-Date -Format "o"
-write-host "RATEL SERVER RETRIEVE"
-write-host $ratelServer
+
 write-host "req body:"
 write-host $Request.body
 write-host "req query:"
@@ -27,6 +24,10 @@ write-host $TenantFilter
 $cwaClientId = Get-LabtechClientId($TenantFilter)
 write-host "cwaClientId $cwaClientId"
 write-host $cwaClientId
+$ratelServer = Get-LabtechServerId($cwaClientId)
+$date = Get-Date -Format "o"
+write-host "RATEL SERVER RETRIEVE"
+write-host $ratelServer
 # Get Automate Auth Token
 $null = Connect-AzAccount -Identity
 # $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
