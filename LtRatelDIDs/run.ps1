@@ -14,7 +14,10 @@ if ($Request.Query.TenantFilter) {
 } else {
     $TenantFilter = $Request.body.TenantFilter
 }
-
+$ratelServer = Get-LabtechServerId($cwaClientId)
+$date = Get-Date -Format "o"
+write-host "RATEL SERVER RETRIEVE"
+write-host $ratelServer
 write-host "req body:"
 write-host $Request.body
 write-host "req query:"
@@ -119,8 +122,7 @@ try {
         } | ConvertTo-json
     }
     # schedule script to update ratel server
-    $ratelServer = Get-LabtechServerId($cwaClientId)
-    $date = Get-Date -Format "o"
+    
     write-host $scriptBody
     $cwaHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $cwaHeaders.Add("Authorization", "Bearer $token")
