@@ -30,7 +30,7 @@ write-host "RATEL SERVER RETRIEVE"
 write-host $ratelServer
 # Get Automate Auth Token
 $null = Connect-AzAccount -Identity
-# $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
+$token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
 try {
     if ($Request.Query.Action -eq "Delete") { 
         write-host "delete entry client id: $cwaClientId"
@@ -127,7 +127,7 @@ try {
     write-host $scriptBody
     $cwaHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $cwaHeaders.Add("Authorization", "Bearer $token")
-    $cwaHeaders.Add("ClientId", $ENV:CwaClientId)
+    $cwaHeaders.Add("ClientId", $cwaClientId)
     $cwaHeaders.Add("Content-Type", "application/json")
     $scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | ConvertTo-Json
    
