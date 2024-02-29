@@ -129,8 +129,11 @@ try {
     $cwaHeaders.Add("Authorization", "Bearer $token")
     $cwaHeaders.Add("ClientId", $ENV:CwaClientId)
     $cwaHeaders.Add("Content-Type", "application/json")
+    write-host "cwaHeaders"
+    write-host $cwaHeaders
     $scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | ConvertTo-Json
-   
+   write-host "SCRIPT RESULT"
+   write-host $scriptResult
     $body = @{"Results" = "DID modifications stored in database" }
 
 } 
