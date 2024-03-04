@@ -77,6 +77,8 @@ try {
 "@
     }
     elseif ($Request.body.DidType -eq "Device") {
+        $ratelServer = Get-LabtechServerId($cwaClientId)
+        $date = Get-Date -Format "o"
         write-host "DIDTYPE: Device"
         $didobj = $Request.body
         write-host "update entry client id: $cwaClientId"
@@ -135,8 +137,7 @@ try {
         } | ConvertTo-json
     }
     # schedule script to update ratel server
-    $ratelServer = Get-LabtechServerId($cwaClientId)
-    $date = Get-Date -Format "o"
+    
     write-host $scriptBody
     $cwaHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $cwaHeaders.Add("Authorization", "Bearer $token")
