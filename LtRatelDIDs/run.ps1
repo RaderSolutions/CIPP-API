@@ -77,6 +77,7 @@ try {
 "@
     }
     elseif ($Request.body.DidType -eq "Device") {
+        write-host "DIDTYPE: Device"
         $didobj = $Request.body
         write-host "update entry client id: $cwaClientId"
         write-host "did: $($didobj.DidNumber)"
@@ -133,21 +134,23 @@ try {
             Priority           = 12
         } | ConvertTo-json
     }
-     
+    # schedule script to update ratel server
+    $ratelServer = Get-LabtechServerId($cwaClientId)
+    $date = Get-Date -Format "o"
+    write-host $scriptBody
+    $cwaHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+    $cwaHeaders.Add("Authorization", "Bearer $token")
+    $cwaHeaders.Add("ClientId", $ENV:CwaClientId)
+    $cwaHeaders.Add("Content-Type", "application/json")
+    $scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | ConvertTo-Json
+    write-host "script result:"
+    write-host $scriptResult    
     $body = @{"Results" = "DID modifications stored in database" }
 
 }
         
     
-# schedule script to update ratel server
-# $ratelServer = Get-LabtechServerId($cwaClientId)
-# $date = Get-Date -Format "o"
-# write-host $scriptBody
-# $cwaHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-# $cwaHeaders.Add("Authorization", "Bearer $token")
-# $cwaHeaders.Add("ClientId", $ENV:CwaClientId)
-# $cwaHeaders.Add("Content-Type", "application/json")
-# $scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | ConvertTo-Json
+
 
 
 catch { 
