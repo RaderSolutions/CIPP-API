@@ -27,7 +27,7 @@ write-host "cwaClientId $cwaClientId"
 write-host $cwaClientId
 # Get Automate Auth Token
 $null = Connect-AzAccount -Identity
-# $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
+$token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
 try {
     if ($Request.Query.Action -eq "Delete") { 
         write-host "delete entry client id: $cwaClientId"
