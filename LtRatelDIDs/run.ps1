@@ -112,7 +112,7 @@ try {
         $scriptBody = @{ 
             EntityType         = 1
             EntityIds          = @($ratelServer)
-            ScriptId           = 7353
+            ScriptId           = "7353"
             Schedule           = @{
                 ScriptScheduleFrequency = @{ 
                     ScriptScheduleFrequencyId = 1
@@ -120,12 +120,12 @@ try {
             }
             Parameters         = @(
                 @{
+                    Value = $($Request.body.DidNumber)
                     Key   = "DID"
-                    value = $($Request.body.DidNumber)
                 },
                 @{
+                    Value = $($Request.body.Dialplan)
                     Key   = "Dialplan"
-                    value = $($Request.body.Dialplan)
                 }
             )
             UseAgentTime       = $False 
