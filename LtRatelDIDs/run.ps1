@@ -11,7 +11,8 @@ Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:Lt
 # $TenantFilter = $Request.Query.TenantFilter
 if ($Request.Query.TenantFilter) {
     $TenantFilter = $Request.Query.TenantFilter
-} else {
+}
+else {
     $TenantFilter = $Request.body.TenantFilter
 }
 
@@ -41,10 +42,11 @@ try {
                     ScriptScheduleFrequencyId = 1
                 }
             }
-            Parameters = @(
+            Parameters         = @(
                 @{
-                Key = "TenDigitNumber"
-                value= $($Request.Query.DIDNumber)}
+                    Key   = "TenDigitNumber"
+                    value = $($Request.Query.DIDNumber)
+                }
             )
             UseAgentTime       = $False 
             StartDate          = $date
@@ -53,7 +55,8 @@ try {
             }
             Priority           = 12
         } | ConvertTo-json
-    } elseif ($Request.body.DidType -eq "ConferenceBridge") {
+    }
+    elseif ($Request.body.DidType -eq "ConferenceBridge") {
         $didobj = $Request.body
         write-host "conf bridge client id: $cwaClientId"
         write-host "did: $($didobj.DidNumber)"
@@ -72,7 +75,21 @@ try {
             confbridge_number='$($didobj.Extension)',
             did='$($didobj.DidNumber)';
 "@
-    } 
+    }
+    elseif ($Request.body.DidType -eq "Device") {
+        $didobj = $Request.body
+        write-host "update entry client id: $cwaClientId"
+        write-host "did: $($didobj.DidNumber)"
+        write-host "device id: $($didobj.DeviceId)"
+        write-host "set caller id: $($didobj.SetCallerId)"
+        Invoke-SqlQuery -Query @"
+        UPDATE labtech.plugin_rader_ratel_did
+        SET device_id='$($didobj.DeviceId)',
+            is_device_callerid='$($didobj.SetCallerId)',
+            is_sync_scheduled=1,
+            client_id='$cwaClientId',
+            custom_dialplan=""
+        WHERE number='$($didobj.DidNumber)' AND client_id='$cwaClientId';
     else { 
         $didobj = $Request.body
         write-host "add entry client id: $cwaClientId"
@@ -110,6 +127,16 @@ try {
                     ScriptScheduleFrequencyId = 1
                 }
             }
+            Parameters         = @(
+                @{
+                    Key   = "DID"
+                    value = $($Request.Query.DIDNumber)
+                },
+                @{
+                    Key   = "Dialplan"
+                    value = $($Request.Query.Dialplan)
+                }
+            )
             UseAgentTime       = $False 
             StartDate          = $date
             OfflineActionFlags = @{
@@ -118,18 +145,23 @@ try {
             Priority           = 12
         } | ConvertTo-json
     }
-    # schedule script to update ratel server
-    # $ratelServer = Get-LabtechServerId($cwaClientId)
-    # $date = Get-Date -Format "o"
-    # write-host $scriptBody
-    # $cwaHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-    # $cwaHeaders.Add("Authorization", "Bearer $token")
-    # $cwaHeaders.Add("ClientId", $ENV:CwaClientId)
-    # $cwaHeaders.Add("Content-Type", "application/json")
-    # $scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | ConvertTo-Json
+     
     $body = @{"Results" = "DID modifications stored in database" }
 
-} 
+}
+        
+    
+# schedule script to update ratel server
+# $ratelServer = Get-LabtechServerId($cwaClientId)
+# $date = Get-Date -Format "o"
+# write-host $scriptBody
+# $cwaHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+# $cwaHeaders.Add("Authorization", "Bearer $token")
+# $cwaHeaders.Add("ClientId", $ENV:CwaClientId)
+# $cwaHeaders.Add("Content-Type", "application/json")
+# $scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | ConvertTo-Json
+
+
 catch { 
     $body = @{"Results" = "Something went wrong." }
     write-host $_.Exception
