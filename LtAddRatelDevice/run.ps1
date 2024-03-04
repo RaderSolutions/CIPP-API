@@ -113,6 +113,16 @@ try {
                 ScriptScheduleFrequencyId = 1
             }
         }
+        Parameters         = @(
+        @{
+            Name  = "device_id"
+            Value = 0
+        },
+        @{
+            Name  = "force_resync_all"
+            Value = 0
+        }
+    )
         UseAgentTime       = $False 
         StartDate          = $date
         OfflineActionFlags = @{
