@@ -35,6 +35,7 @@ if($Request.Query.RatelScript -eq "true"){
         $Request.Query.Parameters.replace("|", "`n").split(",") | foreach { 
             $parameter = ConvertFrom-StringData -StringData $_
             $parameters += $parameter
+            write-host "PARAMETERS"
             write-host $parameters
         }
     } elseif ($scriptobj) {
