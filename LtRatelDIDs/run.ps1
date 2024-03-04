@@ -119,11 +119,11 @@ try {
             Parameters         = @(
                 @{
                     Key   = "DID"
-                    value = $($Request.Query.DIDNumber)
+                    value = $($Request.body.DidNumber)
                 },
                 @{
                     Key   = "Dialplan"
-                    value = $($Request.Query.Dialplan)
+                    value = $($Request.body.Dialplan)
                 }
             )
             UseAgentTime       = $False 
