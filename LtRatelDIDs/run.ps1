@@ -61,6 +61,7 @@ try {
         write-host "conf bridge client id: $cwaClientId"
         write-host "did: $($didobj.DidNumber)"
         write-host "conf bridge: $($didobj.Extension)"
+        7336
         Invoke-SqlQuery -Query @"
         INSERT INTO labtech.plugin_rader_ratel_confbridge (
             confbridge_number,
@@ -75,6 +76,22 @@ try {
             confbridge_number='$($didobj.Extension)',
             did='$($didobj.DidNumber)';
 "@
+        $scriptBody = @{ 
+            EntityType         = 1
+            EntityIds          = @($ratelServer)
+            ScriptId           = "7336"
+            Schedule           = @{
+                ScriptScheduleFrequency = @{ 
+                    ScriptScheduleFrequencyId = 1
+                }
+            }
+            UseAgentTime       = $False 
+            StartDate          = $date
+            OfflineActionFlags = @{
+                SkipOfflineAgents = $True
+            }
+            Priority           = 12
+        } | ConvertTo-json
     }
     elseif ($Request.body.DidType -eq "Device") {
         $ratelServer = Get-LabtechServerId($cwaClientId)
