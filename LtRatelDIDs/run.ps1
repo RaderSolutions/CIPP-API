@@ -83,18 +83,6 @@ try {
         write-host "device id: $($didobj.DeviceId)"
         write-host "set caller id: $($didobj.SetCallerId)"
         Invoke-SqlQuery -Query @"
-        UPDATE labtech.plugin_rader_ratel_did
-        SET device_id='$($didobj.DeviceId)',
-            is_device_callerid='$($didobj.SetCallerId)',
-            is_sync_scheduled=1,
-            client_id='$cwaClientId',
-            custom_dialplan=""
-        WHERE number='$($didobj.DidNumber)' AND client_id='$cwaClientId';
-    else { 
-        $didobj = $Request.body
-        write-host "add entry client id: $cwaClientId"
-        write-host "did: $($didobj.DidNumber)"
-        Invoke-SqlQuery -Query @"
         INSERT INTO labtech.plugin_rader_ratel_did (
             number,
             device_id,
