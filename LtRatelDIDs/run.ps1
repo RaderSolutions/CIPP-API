@@ -188,7 +188,7 @@ try {
                 },
                 @{
                     Key   = "Notes"
-                    Value = $($Request.body.DialplanName)
+                    Value = $($Request.body.Notes)
                 }
             )
             UseAgentTime       = $False 
