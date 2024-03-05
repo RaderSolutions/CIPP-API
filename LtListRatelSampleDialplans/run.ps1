@@ -11,6 +11,14 @@ $queryName = $Request.Query
 write-host $queryName
 $queryNameBody = $Request.Body
 write-host $queryNameBody
+if ($Request.Query.Name -eq "AddDid") { 
+    write-host "SAMPLE TYPE: Add"
+    $table = Invoke-SqlQuery -Query "SELECT 
+CONCAT(plugin_rader_ratel_sample_dialplan.sample_name, ': ', plugin_rader_ratel_sample_dialplan.dialplan_Description) as 'Name',
+dialplan_data as 'DialplanData'
+FROM  
+plugin_rader_ratel_sample_dialplan WHERE sample_name='DefaultDIDToExtensionDialplan' LIMIT 1"
+} else {
 $table = Invoke-SqlQuery -Query "SELECT 
 CONCAT(plugin_rader_ratel_sample_dialplan.sample_name, ': ', plugin_rader_ratel_sample_dialplan.dialplan_Description) as 'Name',
 dialplan_data as 'DialplanData'
@@ -20,6 +28,8 @@ plugin_rader_ratel_sample_dialplan WHERE sample_name='DefaultDIDToExtensionDialp
 # dialplan_data as 'DialplanData'
 # FROM  
 # plugin_rader_ratel_sample_dialplan WHERE dialplan_type='External'"
+}
+
 
 # plugin_rader_ratel_sample_dialplan WHERE dialplan_type='External'"
 $dialplans = $table | Select-Object * -ExcludeProperty RowError,RowState,Table,ItemArray,HasErrors 
