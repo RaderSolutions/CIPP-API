@@ -18,24 +18,26 @@ CONCAT(plugin_rader_ratel_sample_dialplan.sample_name, ': ', plugin_rader_ratel_
 dialplan_data as 'DialplanData'
 FROM  
 plugin_rader_ratel_sample_dialplan WHERE sample_name='DefaultDIDToExtensionDialplan' LIMIT 1"
-} else {
-$table = Invoke-SqlQuery -Query "SELECT 
+}
+elseif ($Request.Query.Name -eq "EditDid") { 
+    write-host "SAMPLE TYPE: Edit"
+    $table = Invoke-SqlQuery -Query "SELECT 
 CONCAT(plugin_rader_ratel_sample_dialplan.sample_name, ': ', plugin_rader_ratel_sample_dialplan.dialplan_Description) as 'Name',
 dialplan_data as 'DialplanData'
 FROM  
 plugin_rader_ratel_sample_dialplan WHERE dialplan_type='External'"
-# CONCAT(plugin_rader_ratel_sample_dialplan.sample_name, ': ', plugin_rader_ratel_sample_dialplan.dialplan_Description) as 'Name',
-# dialplan_data as 'DialplanData'
-# FROM  
-# plugin_rader_ratel_sample_dialplan WHERE dialplan_type='External'"
+    # CONCAT(plugin_rader_ratel_sample_dialplan.sample_name, ': ', plugin_rader_ratel_sample_dialplan.dialplan_Description) as 'Name',
+    # dialplan_data as 'DialplanData'
+    # FROM  
+    # plugin_rader_ratel_sample_dialplan WHERE dialplan_type='External'"
 }
 
 
 # plugin_rader_ratel_sample_dialplan WHERE dialplan_type='External'"
-$dialplans = $table | Select-Object * -ExcludeProperty RowError,RowState,Table,ItemArray,HasErrors 
+$dialplans = $table | Select-Object * -ExcludeProperty RowError, RowState, Table, ItemArray, HasErrors 
 Close-SqlConnection
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
-    StatusCode = [HttpStatusCode]::OK
-    Body = $dialplans
-})
+        StatusCode = [HttpStatusCode]::OK
+        Body       = $dialplans
+    })
