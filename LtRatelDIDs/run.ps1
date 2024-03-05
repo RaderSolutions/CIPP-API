@@ -15,7 +15,8 @@ if ($Request.Query.TenantFilter) {
 else {
     $TenantFilter = $Request.body.TenantFilter
 }
-
+$ratelServer = Get-LabtechServerId($cwaClientId)
+$date = Get-Date -Format "o"
 write-host "req body:"
 write-host $Request.body
 write-host "req query:"
@@ -57,11 +58,13 @@ try {
         } | ConvertTo-json
     }
     elseif ($Request.body.DidType -eq "ConferenceBridge") {
+        # $ratelServer = Get-LabtechServerId($cwaClientId)
+        # $date = Get-Date -Format "o"
+        write-host "DIDTYPE: ConferenceBridge"
         $didobj = $Request.body
         write-host "conf bridge client id: $cwaClientId"
         write-host "did: $($didobj.DidNumber)"
         write-host "conf bridge: $($didobj.Extension)"
-        7336
         Invoke-SqlQuery -Query @"
         INSERT INTO labtech.plugin_rader_ratel_confbridge (
             confbridge_number,
@@ -94,8 +97,8 @@ try {
         } | ConvertTo-json
     }
     elseif ($Request.body.DidType -eq "Device") {
-        $ratelServer = Get-LabtechServerId($cwaClientId)
-        $date = Get-Date -Format "o"
+        # $ratelServer = Get-LabtechServerId($cwaClientId)
+        # $date = Get-Date -Format "o"
         write-host "DIDTYPE: Device"
         $didobj = $Request.body
         write-host "update entry client id: $cwaClientId"
@@ -166,11 +169,6 @@ try {
     $body = @{"Results" = "DID modifications stored in database" }
 
 }
-        
-    
-
-
-
 catch { 
     $body = @{"Results" = "Something went wrong." }
     write-host $_.Exception
