@@ -38,7 +38,7 @@ try {
         $scriptBody = @{ 
             EntityType         = 1
             EntityIds          = @($ratelServer)
-            ScriptId           = "TODO: get script id"
+            ScriptId           = "7351"
             Schedule           = @{
                 ScriptScheduleFrequency = @{ 
                     ScriptScheduleFrequencyId = 1
