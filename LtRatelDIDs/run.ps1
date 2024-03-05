@@ -15,8 +15,8 @@ if ($Request.Query.TenantFilter) {
 else {
     $TenantFilter = $Request.body.TenantFilter
 }
-$ratelServer = Get-LabtechServerId($cwaClientId)
-$date = Get-Date -Format "o"
+# $ratelServer = Get-LabtechServerId($cwaClientId)
+# $date = Get-Date -Format "o"
 write-host "req body:"
 write-host $Request.body
 write-host "req query:"
@@ -31,6 +31,7 @@ $null = Connect-AzAccount -Identity
 $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
 try {
     if ($Request.Query.Action -eq "Delete") { 
+        write-host "DIDTYPE: Delete"
         write-host "delete entry client id: $cwaClientId"
         write-host "$($cwaClientId)"
         Invoke-SqlQuery -Query "DELETE from labtech.plugin_rader_ratel_did WHERE number='$($Request.Query.DIDNumber)' AND client_id='$($cwaClientId)' LIMIT 1;"
@@ -58,8 +59,8 @@ try {
         } | ConvertTo-json
     }
     elseif ($Request.body.DidType -eq "ConferenceBridge") {
-        # $ratelServer = Get-LabtechServerId($cwaClientId)
-        # $date = Get-Date -Format "o"
+        $ratelServer = Get-LabtechServerId($cwaClientId)
+        $date = Get-Date -Format "o"
         write-host "DIDTYPE: ConferenceBridge"
         $didobj = $Request.body
         write-host "conf bridge client id: $cwaClientId"
@@ -97,8 +98,8 @@ try {
         } | ConvertTo-json
     }
     elseif ($Request.body.DidType -eq "Device") {
-        # $ratelServer = Get-LabtechServerId($cwaClientId)
-        # $date = Get-Date -Format "o"
+        $ratelServer = Get-LabtechServerId($cwaClientId)
+        $date = Get-Date -Format "o"
         write-host "DIDTYPE: Device"
         $didobj = $Request.body
         write-host "update entry client id: $cwaClientId"
