@@ -23,7 +23,7 @@ $table = Invoke-SqlQuery -Query "SELECT
 CONCAT(plugin_rader_ratel_sample_dialplan.sample_name, ': ', plugin_rader_ratel_sample_dialplan.dialplan_Description) as 'Name',
 dialplan_data as 'DialplanData'
 FROM  
-plugin_rader_ratel_sample_dialplan WHERE sample_name='DefaultDIDToExtensionDialplan' LIMIT 1"
+plugin_rader_ratel_sample_dialplan WHERE dialplan_type='External'"
 # CONCAT(plugin_rader_ratel_sample_dialplan.sample_name, ': ', plugin_rader_ratel_sample_dialplan.dialplan_Description) as 'Name',
 # dialplan_data as 'DialplanData'
 # FROM  
