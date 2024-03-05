@@ -66,6 +66,7 @@ try {
         write-host "conf bridge client id: $cwaClientId"
         write-host "did: $($didobj.DidNumber)"
         write-host "conf bridge: $($didobj.Extension)"
+        
         Invoke-SqlQuery -Query @"
         INSERT INTO labtech.plugin_rader_ratel_confbridge (
             confbridge_number,
@@ -106,6 +107,12 @@ try {
         write-host "did: $($didobj.DidNumber)"
         write-host "device id: $($didobj.DeviceId)"
         write-host "set caller id: $($didobj.SetCallerId)"
+        if ($didobj.IsDeviceCallerId -eq "true") {
+            $isDeviceCallerId = 1
+        } else {
+            $isDeviceCallerId = 0
+        }
+    
         Invoke-SqlQuery -Query @"
         INSERT INTO labtech.plugin_rader_ratel_did (
             number,
@@ -117,7 +124,7 @@ try {
         ) VALUES (
             '$($didobj.DidNumber)',
             '$($didobj.DeviceId)',
-            '$($didobj.IsDeviceCallerId)',
+            '$($isDeviceCallerId)',
             1,
             '$cwaClientId',
             ""
