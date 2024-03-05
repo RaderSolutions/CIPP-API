@@ -163,6 +163,41 @@ try {
             }
             Priority           = 12
         } | ConvertTo-json
+    } elseif ($Request.body.DidType -eq "IncomingDialplan") {
+        $ratelServer = Get-LabtechServerId($cwaClientId)
+        $date = Get-Date -Format "o"
+        write-host "DIDTYPE: IncomingDialplan"
+        $didobj = $Request.body
+        $scriptBody = @{ 
+            EntityType         = 1
+            EntityIds          = @($ratelServer)
+            ScriptId           = "7352"
+            Schedule           = @{
+                ScriptScheduleFrequency = @{ 
+                    ScriptScheduleFrequencyId = 1
+                }
+            }
+            Parameters         = @(
+                @{
+                    Key   = "DID"
+                    Value = $($Request.body.DidNumber)
+                },
+                @{
+                    Key   = "Dialplan"
+                    Value = $($Request.body.Dialplan)
+                },
+                @{
+                    Key   = "Notes"
+                    Value = $($Request.body.DialplanName)
+                }
+            )
+            UseAgentTime       = $False 
+            StartDate          = $date
+            OfflineActionFlags = @{
+                SkipOfflineAgents = $True
+            }
+            Priority           = 12
+        } | ConvertTo-json
     }
     # schedule script to update ratel server
     
