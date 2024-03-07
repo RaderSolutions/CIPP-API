@@ -14,7 +14,9 @@ $TenantFilter = $Request.Query.TenantFilter
 write-host $TenantFilter
 $cwaClientId = Get-LabtechClientId($TenantFilter)
 write-host $cwaClientId
-
+if ($cwaClientId -eq 291) {
+    $cwaClientId = 1
+}
 if($Request.Query.DeviceID){
     $deviceId=$Request.Query.DeviceID
     write-host $deviceId
@@ -56,6 +58,9 @@ if($Request.Query.DeviceID){
 " -AsDataTable
 } else {
     write-host "client id : $cwaClientId"
+    if ($cwaClientId -eq 291) {
+        $cwaClientId = 1
+    }
 $table = Invoke-SqlQuery -Query "SELECT 
         plugin_rader_ratel_device.id AS 'DeviceId',
         mac_address AS 'MacAddress', 
