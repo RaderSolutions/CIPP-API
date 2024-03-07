@@ -102,30 +102,40 @@ try {
         is_hidden_in_phonebook='$($deviceobj.hideFromPhonebook)';"
     }
     #schedule script to update ratel server Run the Pending Device Script to push to Server'); RaTel 2.0 - Add Outstanding Extensions to System
-    # $ratelServer = Get-LabtechServerId($cwaClientId)
-    # $date = Get-Date -Format "o"
-    # $scriptBody = @{ 
-    #     EntityType         = 1
-    #     EntityIds          = @($ratelServer)
-    #     ScriptId           = 6886
-    #     Schedule           = @{
-    #         ScriptScheduleFrequency = @{ 
-    #             ScriptScheduleFrequencyId = 1
-    #         }
-    #     }
-    #     UseAgentTime       = $False 
-    #     StartDate          = $date
-    #     OfflineActionFlags = @{
-    #         SkipOfflineAgents = $True
-    #     }
-    #     Priority           = 12
-    # } | ConvertTo-json
-    # write-host $scriptBody
-    # $cwaHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-    # $cwaHeaders.Add("Authorization", "Bearer $token")
-    # $cwaHeaders.Add("ClientId", $ENV:CwaClientId)
-    # $cwaHeaders.Add("Content-Type", "application/json")
-    # $scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | ConvertTo-Json
+    $ratelServer = Get-LabtechServerId($cwaClientId)
+    $date = Get-Date -Format "o"
+    $scriptBody = @{ 
+        EntityType         = 1
+        EntityIds          = @($ratelServer)
+        ScriptId           = 6886
+        Schedule           = @{
+            ScriptScheduleFrequency = @{ 
+                ScriptScheduleFrequencyId = 1
+            }
+        }
+        Parameters         = @(
+            @{
+                Key  = "device_id"
+                Value = 0
+            }
+            @{
+                Key  = "force_resync_all"
+                Value = 0
+            }
+        )
+        UseAgentTime       = $False 
+        StartDate          = $date
+        OfflineActionFlags = @{
+            SkipOfflineAgents = $True
+        }
+        Priority           = 12
+    } | ConvertTo-json
+    write-host $scriptBody
+    $cwaHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+    $cwaHeaders.Add("Authorization", "Bearer $token")
+    $cwaHeaders.Add("ClientId", $ENV:CwaClientId)
+    $cwaHeaders.Add("Content-Type", "application/json")
+    $scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | ConvertTo-Json
     $results.add("Device data entered into database")
     $body = @{"Results" = @($results) }
 } 
