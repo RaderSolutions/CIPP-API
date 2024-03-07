@@ -23,8 +23,8 @@ try {
     else {
         $ParsedRequest = $Result
     }
-
-
+    write-host "Result: $($Result | ConvertTo-Json -Depth 5)"
+    write-host "Parsed Request: $($ParsedRequest | ConvertTo-Json -Depth 5)"
     $GraphRequest = $ParsedRequest | Select-Object @{ Name = 'UPN'; Expression = { $_.'Owner Principal Name' } },
     @{ Name = 'displayName'; Expression = { $_.'Owner Display Name' } },
     @{ Name = 'LastActive'; Expression = { $_.'Last Activity Date' } },
