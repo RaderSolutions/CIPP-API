@@ -15,6 +15,9 @@ function Get-LabtechClientId($TenantFilter) {
     $cwaHeaders.Add("ClientId", $ENV:CwaClientId)
     $cwaHeaders.Add("Content-Type", "application/json")
     $cwaClientId = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/clients?condition=externalid=$($clientId)" -Method 'GET' -Headers $cwaHeaders).id
+    if ($cwaClientId -eq 291) {
+        $cwaClientId = 1
+    }
     return $cwaClientId
 }
 
