@@ -48,6 +48,9 @@ function Get-LabtechClientId($TenantFilter) {
     }
     catch {
         Write-Error "Error in Get-LabtechClientId: $_"
+        write-host $clientId
+        write-host "CWA RESP"
+        write-host $cwaResponse
         return $null
     }
 }
