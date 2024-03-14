@@ -28,8 +28,11 @@ function Get-LabtechClientId($TenantFilter) {
             "Authorization" = $ENV:CwManage
         }
         $response = Invoke-RestMethod -Uri "https://api-na.myconnectwise.net/v4_6_release/apis/3.0/company/companies?conditions=userDefinedField10='$($TenantFilter)'&fields=id" -Method 'GET' -Headers $headers
-        $clientId = $response.id 
-
+        if ($response -is [array] -and $response.Count -gt 1) {
+            $clientId = $response[0].id
+        } else {
+            $clientId = $response.id
+        }
         $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
         $cwaHeaders = @{
             "Authorization" = "Bearer $token"
@@ -39,11 +42,9 @@ function Get-LabtechClientId($TenantFilter) {
         $cwaResponse = Invoke-RestMethod -Uri "https://labtech.radersolutions.com/cwa/api/v1/clients?condition=externalid=$($clientId)" -Method 'GET' -Headers $cwaHeaders
         $cwaClientId = $cwaResponse.id
 
-        # Handle special condition
         if ($cwaClientId -eq 291) {
             $cwaClientId = 1
         }
-
         return $cwaClientId
     }
     catch {
@@ -56,7 +57,7 @@ function Get-LabtechClientId($TenantFilter) {
 }
 
 
-function Get-LabtechServerId($ClientId){ 
+function Get-LabtechServerId($ClientId) { 
     Open-MySqlConnection -Server $ENV:LtServer -Database $ENV:LtDB -UserName $ENV:LtUser -Password $ENV:LtPass -Port 3306
     $table = Invoke-SqlQuery -Query "SELECT computerid FROM labtech.computers where name like '%ratel%' and name not like '%sz%' and clientId = $ClientId limit 1"
     return $table.computerid
