@@ -30,8 +30,10 @@ function Get-LabtechClientId($TenantFilter) {
         $response = Invoke-RestMethod -Uri "https://api-na.myconnectwise.net/v4_6_release/apis/3.0/company/companies?conditions=userDefinedField10='$($TenantFilter)'&fields=id" -Method 'GET' -Headers $headers
         if ($response -is [array] -and $response.Count -gt 1) {
             $clientId = $response[0].id
+            Write-Host "Response is an array. First ID is: $clientId"
         } else {
             $clientId = $response.id
+            Write-Host "Response is not an array or has only one item. ID is: $clientId"
         }
         $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
         $cwaHeaders = @{
