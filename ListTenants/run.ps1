@@ -62,7 +62,8 @@ catch {
 
     }
 }
-write-host "BODY: $body"
+$jsonBody = $body | ConvertTo-Json -Depth 5
+write-host "JSONBODY: $jsonBody"
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
         Body       = @($Body)
