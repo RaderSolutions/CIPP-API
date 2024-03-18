@@ -62,7 +62,7 @@ catch {
 
     }
 }
-
+write-host "BODY: $body"
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
         Body       = @($Body)
