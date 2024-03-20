@@ -1,15 +1,12 @@
+
 using namespace System.Net
 
 param($Request, $TriggerMetadata)
-
 
 # Import the Azure PowerShell module
 $APIName = $TriggerMetadata.FunctionName
 $null = Connect-AzAccount -Identity
 
-
-
-# $storageAccountName = "your_storage_account_name"
 $containerName = "configs"
 
 $storageContext = Get-AzStorageAccount -ResourceGroupName $ENV:ResourceGroup -Name $ENV:StorageAcct
@@ -31,8 +28,9 @@ $responseData = @{
     "blobs" = $blobs
 }
 
+$responseJson = $responseData | ConvertTo-Json
 
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
     StatusCode = [HttpStatusCode]::OK
-    Body       = $responseData | ConvertTo-Json
+    Body       = $responseJson
 })
