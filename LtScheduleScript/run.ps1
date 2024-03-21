@@ -71,6 +71,8 @@ if($parameters){
         }
         Priority = 12
     } | ConvertTo-json -Depth 6
+    write-host "PARAMETERS"
+    write-host $parameters
 } else { 
     $scriptBody= @{ 
         EntityType = $targetType
