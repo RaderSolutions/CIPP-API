@@ -31,6 +31,8 @@ $null = Connect-AzAccount -Identity
 $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
 try {
     if ($Request.Query.Action -eq "Delete") { 
+        $ratelServer = Get-LabtechServerId($cwaClientId)
+        $date = Get-Date -Format "o"
         write-host "DIDTYPE: Delete"
         write-host "delete entry client id: $cwaClientId"
         write-host "$($cwaClientId)"
