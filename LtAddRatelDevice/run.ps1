@@ -40,7 +40,7 @@ try {
          location_id,
          fop_group,
          is_sync_scheduled) 
-      VALUES ('$($deviceobj.MACAddress)', 
+      VALUES ('$($deviceobj.MacAddress)', 
             '',
             '',
             '',
@@ -51,7 +51,7 @@ try {
             '$($deviceobj.ProductId)', 
             '$cwaClientId',
             '$($deviceobj.LocationId)', 
-            '$($deviceobj.FOPGroup)',
+            '$($deviceobj.FopGroup)',
             1)
       ON DUPLICATE KEY UPDATE extension_number='$($deviceobj.ExtensionNumber)',
         label = '',
@@ -63,7 +63,7 @@ try {
          product_id='$($deviceobj.ProductId)',
          client_id='$cwaClientId',
          location_id='$($deviceobj.LocationId)',
-         fop_group='$($deviceobj.FOPGroup)',
+         fop_group='$($deviceobj.FopGroup)',
          is_sync_scheduled=1;"
     }
     else {
