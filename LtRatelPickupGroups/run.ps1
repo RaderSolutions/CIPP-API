@@ -40,7 +40,7 @@ try {
         extension = '$($pickupGroupObj.Extension)',
         is_sync_scheduled = '$($pickupGroupObj.IsSyncScheduled)'
         WHERE id='$($pickupGroupObj.ID)' AND client_id=$cwaClientId LIMIT 1;
-        UPDATE labtech.plugin_rader_ratel_device WHERE client_id=$cwaClientId AND extension_number=$($pickupGroupObj.Extension);
+        UPDATE labtech.plugin_rader_ratel_device WHERE client_id='$cwaClientId' AND extension_number='$($pickupGroupObj.Extension)';
 "@
     }
     else { 
