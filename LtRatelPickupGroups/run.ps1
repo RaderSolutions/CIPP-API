@@ -32,7 +32,7 @@ try {
     }
     elseif ($Request.body.Action -eq "Edit") {
         $pickupGroupObj = $Request.body
-        write-host ""
+        write-host "EDIT CONDITION"
         Invoke-SqlQuery -Query @"
         UPDATE labtech.plugin_rader_ratel_pickupgroups 
         SET group_name = '$($pickupGroupObj.Groups)',
@@ -40,7 +40,6 @@ try {
         extension = '$($pickupGroupObj.Extension)',
         is_sync_scheduled = '$($pickupGroupObj.IsSyncScheduled)'
         WHERE id='$($pickupGroupObj.ID)' AND client_id=$cwaClientId LIMIT 1;
-        UPDATE labtech.plugin_rader_ratel_device WHERE client_id='$cwaClientId' AND extension_number='$($pickupGroupObj.Extension)';
 "@
     }
     else { 
