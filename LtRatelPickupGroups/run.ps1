@@ -37,9 +37,10 @@ try {
         UPDATE labtech.plugin_rader_ratel_pickupgroups 
         SET group_name = '$($pickupGroupObj.Groups)',
         membership_type = '$($pickupGroupObj.Type)',
-        extension = '$($pickupGroupObj.Extension)'
+        extension = '$($pickupGroupObj.Extension)',
+        is_sync_scheduled = '$($pickupGroupObj.IsSyncScheduled)'
         WHERE id='$($pickupGroupObj.ID)' AND client_id=$cwaClientId LIMIT 1;
-        UPDATE labtech.plugin_rader_ratel_device SET is_sync_scheduled=1 WHERE client_id=$cwaClientId AND extension_number=$($pickupGroupObj.Extension);
+        UPDATE labtech.plugin_rader_ratel_device WHERE client_id=$cwaClientId AND extension_number=$($pickupGroupObj.Extension);
 "@
     }
     else { 
@@ -50,12 +51,13 @@ try {
         $pickupGroupObj = $Request.body
         Invoke-SqlQuery -Query @"
         INSERT INTO labtech.plugin_rader_ratel_pickupgroups 
-        (client_id, extension, membership_type, group_name) 
+        (client_id, extension, membership_type, group_name, is_sync_scheduled) 
         VALUES (
         '$($cwaClientId)',
         '$($pickupGroupObj.Extension)',
         '$($pickupGroupObj.Type)',
-        '$($pickupGroupObj.Groups)'
+        '$($pickupGroupObj.Groups)',
+        '$($pickupGroupObj.IsSyncScheduled)'
         );
 
         UPDATE labtech.plugin_rader_ratel_device 
