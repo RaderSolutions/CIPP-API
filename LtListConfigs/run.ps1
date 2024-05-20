@@ -13,10 +13,13 @@ $storageContext = Get-AzStorageAccount -ResourceGroupName $ENV:ResourceGroup -Na
 $container = Get-AzStorageContainer -Name $containerName -Context $storageContext.Context
 
 $blobs = Get-AzStorageBlob -Container $containerName -Context $storageContext.Context
+write-host $blobs
 $jsonContents = @()
 
 foreach ($blob in $blobs) {
     if ($blob.Name -like "*.json") {
+        write-host "Processing blob: $($blob.Name)"
+        write-host $blob
         $blobContent = (Get-AzStorageBlobContent -Blob $blob.Name -Container $containerName -Context $storageContext.Context).Content
         $decodedContent = [System.Text.Encoding]::UTF8.GetString($blobContent)
         $jsonContents += $decodedContent
