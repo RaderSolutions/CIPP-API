@@ -87,7 +87,7 @@ function Get-GraphToken($tenantid, $scope, $AsApp, $AppID, $refreshToken, $Retur
 
         if ($ReturnRefresh) { $header = $AccessToken } else { $header = @{ Authorization = "Bearer $($AccessToken.access_token)" } }
         return $header
-        #Write-Host $header['Authorization']
+        Write-Host $header['Authorization']
     }
     catch {
         # Track consecutive Graph API failures
