@@ -17,38 +17,38 @@ write-host $Request.Query.DidNumber
 if($Request.Query.DidNumber) {
     write-host "here" 
 $did = $Request.Query.DidNumber
-$table = Invoke-SqlQuery -Query "SELECT plugin_rader_ratel_did.number AS Number, 
-plugin_rader_ratel_device.extension_number AS Extension, 
-plugin_rader_ratel_did.device_id AS 'DeviceId',
+$table = Invoke-SqlQuery -Query "SELECT labtech.plugin_rader_ratel_did.number AS Number, 
+labtech.plugin_rader_ratel_device.extension_number AS Extension, 
+labtech.plugin_rader_ratel_did.device_id AS 'DeviceId',
 contacts.FirstName, 
 contacts.LastName, 
-plugin_rader_ratel_did.custom_dialplan as Dialplan,
-plugin_rader_ratel_did.notes as 'Description', 
-plugin_rader_ratel_did.is_device_callerid as 'IsDeviceCallerId', 
-plugin_rader_ratel_did.is_sync_scheduled AS 'NeedsSync'
-FROM plugin_rader_ratel_did 
-LEFT JOIN plugin_rader_ratel_device ON plugin_rader_ratel_did.device_id=plugin_rader_ratel_device.id 
-LEFT JOIN contacts ON plugin_rader_ratel_device.contact_id=contacts.ContactID 
-WHERE plugin_rader_ratel_did.client_id=$cwaClientId and Number='$did'"
+labtech.plugin_rader_ratel_did.custom_dialplan as Dialplan,
+labtech.plugin_rader_ratel_did.notes as 'Description', 
+labtech.plugin_rader_ratel_did.is_device_callerid as 'IsDeviceCallerId', 
+labtech.plugin_rader_ratel_did.is_sync_scheduled AS 'NeedsSync'
+FROM labtech.plugin_rader_ratel_did 
+LEFT JOIN labtech.plugin_rader_ratel_device ON labtech.plugin_rader_ratel_did.device_id=labtech.plugin_rader_ratel_device.id 
+LEFT JOIN contacts ON labtech.plugin_rader_ratel_device.contact_id=contacts.ContactID 
+WHERE labtech.plugin_rader_ratel_did.client_id=$cwaClientId and Number='$did'"
 }
 else { 
 $table = Invoke-SqlQuery -Query "SELECT 
-plugin_rader_ratel_did.number AS Number, 
-plugin_rader_ratel_device.extension_number AS Extension, 
-plugin_rader_ratel_did.device_id AS 'DeviceId',
+labtech.plugin_rader_ratel_did.number AS Number, 
+labtech.plugin_rader_ratel_device.extension_number AS Extension, 
+labtech.plugin_rader_ratel_did.device_id AS 'DeviceId',
 contacts.FirstName, 
 contacts.LastName, 
-plugin_rader_ratel_did.notes as 'Description', 
-plugin_rader_ratel_did.is_device_callerid as 'IsDeviceCallerId',
-plugin_rader_ratel_did.is_sync_scheduled AS 'NeedsSync'
+labtech.plugin_rader_ratel_did.notes as 'Description', 
+labtech.plugin_rader_ratel_did.is_device_callerid as 'IsDeviceCallerId',
+labtech.plugin_rader_ratel_did.is_sync_scheduled AS 'NeedsSync'
 FROM 
-plugin_rader_ratel_did 
+labtech.plugin_rader_ratel_did 
 LEFT JOIN 
-plugin_rader_ratel_device ON plugin_rader_ratel_did.device_id=plugin_rader_ratel_device.id 
+labtech.plugin_rader_ratel_device ON labtech.plugin_rader_ratel_did.device_id=labtech.plugin_rader_ratel_device.id 
 LEFT JOIN 
-contacts ON plugin_rader_ratel_device.contact_id=contacts.ContactID
+contacts ON labtech.plugin_rader_ratel_device.contact_id=contacts.ContactID
 WHERE  
-plugin_rader_ratel_did.client_id=$cwaClientId" -AsDataTable
+labtech.plugin_rader_ratel_did.client_id=$cwaClientId" -AsDataTable
 }
 
 $dids = $table | Select-Object * -ExcludeProperty RowError,RowState,Table,ItemArray,HasErrors 
