@@ -29,7 +29,7 @@ if($Request.Query.RatelScript -eq "true"){
     $clientid = Get-LabtechClientId($Request.Query.TenantFilter)
     $entity = Get-LabtechServerId($clientid)
     write-host $entity
-    $script = $request.Query.ScriptId
+    $script = [int]$request.Query.ScriptId
     if($Request.Query.Parameters){ 
         $parameters = @()
         $Request.Query.Parameters.replace("|", "`n").split(",") | foreach { 
@@ -47,7 +47,7 @@ if($Request.Query.RatelScript -eq "true"){
 
 } else { 
     $entity = $scriptobj.targetName
-    $script = $scriptobj.ltscriptId
+    $script = [int]$scriptobj.ltscriptId
     $parameters = $scriptobj.jsonFormValues
     $targetType = $scriptobj.TargetType
 }
