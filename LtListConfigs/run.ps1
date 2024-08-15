@@ -16,7 +16,7 @@ $blobs = Get-AzStorageBlob -Container $containerName -Context $storageContext.Co
 write-host $container
 $jsonContents = @()
 
-foreach ($blob in $container) {
+foreach ($blob in $blobs) {
     if ($blob.Name -like "*.json") {
         write-host "Processing blob: $($blob.Name)"
         write-host $blob
