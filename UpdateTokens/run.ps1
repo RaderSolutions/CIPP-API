@@ -3,9 +3,9 @@ param($Timer)
 write-host "updating"
 # Get the current universal time in the default string format.
 $currentUTCtime = (Get-Date).ToUniversalTime()
-$tst = Get-GraphToken
-write-host "tst"
-write-host $tst
+# $tst = Get-GraphToken
+# write-host "tst"
+# write-host $tst
 $tst | convertto-json
 $Refreshtoken = (Get-GraphToken -ReturnRefresh $true).Refresh_token
 write-host "Refresh Token:" $Refreshtoken
