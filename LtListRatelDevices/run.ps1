@@ -69,7 +69,7 @@ $table = Invoke-SqlQuery -Query "SELECT
         COALESCE(contacts.email,email_address) AS 'EmailAddress', 
         contact_id AS 'ContactID', 
         locations.Name AS Location,
-        CONCAT(plugin_rader_ratel_product.manufacturer_name,' ',plugin_rader_ratel_product.model) AS Model, 
+        CONCAT(labtech.plugin_rader_ratel_product.manufacturer_name,' ',labtech.plugin_rader_ratel_product.model) AS Model, 
         GROUP_CONCAT(plugin_rader_ratel_did.number) AS 'DidNumber', 
         fop_group as 'FopGroup',
         labtech.plugin_rader_ratel_device.is_hidden_in_phonebook AS 'HideFromPhonebook',
