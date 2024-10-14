@@ -29,14 +29,14 @@ if($Request.Query.DeviceID){
         contact_id AS 'ContactID', 
         locations.Name AS Location,
         locations.locationId AS LocationId,
-        plugin_rader_ratel_product.id AS ProductId,
-        CONCAT(plugin_rader_ratel_product.manufacturer_name,' ',plugin_rader_ratel_product.model) AS Model, 
+        labtech.plugin_rader_ratel_product.id AS ProductId,
+        CONCAT(labtech.plugin_rader_ratel_product.manufacturer_name,' ',labtech.plugin_rader_ratel_product.model) AS Model, 
         GROUP_CONCAT(plugin_rader_ratel_did.number) AS 'DidNumber', 
         fop_group as 'FopGroup',
-        plugin_rader_ratel_device.is_hidden_in_phonebook AS 'HideFromPhonebook',
-        plugin_rader_ratel_device.is_sync_scheduled AS 'NeedsSync',
-        plugin_rader_ratel_device.last_sync AS 'LastSync', sip_password as 'SipPassword',
-        SUBSTRING_INDEX(plugin_rader_ratel_astdb.astValue,':',1) AS 'IpAddress'
+        labtech.plugin_rader_ratel_device.is_hidden_in_phonebook AS 'HideFromPhonebook',
+        labtech.plugin_rader_ratel_device.is_sync_scheduled AS 'NeedsSync',
+        labtech.plugin_rader_ratel_device.last_sync AS 'LastSync', sip_password as 'SipPassword',
+        SUBSTRING_INDEX(labtech.plugin_rader_ratel_astdb.astValue,':',1) AS 'IpAddress'
     FROM plugin_rader_ratel_device 
     LEFT JOIN 
         labtech.plugin_rader_ratel_product ON labtech.plugin_rader_ratel_product.id=labtech.plugin_rader_ratel_device.product_id 
@@ -62,7 +62,7 @@ if($Request.Query.DeviceID){
         $cwaClientId = 1
     }
 $table = Invoke-SqlQuery -Query "SELECT 
-        plugin_rader_ratel_device.id AS 'DeviceId',
+        labtech.plugin_rader_ratel_device.id AS 'DeviceId',
         mac_address AS 'MacAddress', 
         extension_number AS 'ExtensionNumber', 
         COALESCE(CONCAT(contacts.FirstName,' ',contacts.LastName),label) AS Label, 
