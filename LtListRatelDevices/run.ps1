@@ -21,7 +21,7 @@ if($Request.Query.DeviceID){
     $deviceId=$Request.Query.DeviceID
     write-host $deviceId
     $table = Invoke-SqlQuery -Query "SELECT 
-        plugin_rader_ratel_device.id AS 'DeviceId',
+        labtech.plugin_rader_ratel_device.id AS 'DeviceId',
         mac_address AS 'MacAddress', 
         extension_number AS 'ExtensionNumber', 
         COALESCE(CONCAT(contacts.FirstName,' ',contacts.LastName),label) AS Label, 
@@ -39,22 +39,22 @@ if($Request.Query.DeviceID){
         SUBSTRING_INDEX(plugin_rader_ratel_astdb.astValue,':',1) AS 'IpAddress'
     FROM plugin_rader_ratel_device 
     LEFT JOIN 
-        plugin_rader_ratel_product ON plugin_rader_ratel_product.id=plugin_rader_ratel_device.product_id 
+        labtech.plugin_rader_ratel_product ON labtech.plugin_rader_ratel_product.id=labtech.plugin_rader_ratel_device.product_id 
     LEFT JOIN 
-        contacts ON contacts.contactid=plugin_rader_ratel_device.contact_id 
+        contacts ON contacts.contactid=labtech.plugin_rader_ratel_device.contact_id 
     LEFT JOIN 
-        locations ON locations.locationID=plugin_rader_ratel_device.location_id 
+        locations ON locations.locationID=labtech.plugin_rader_ratel_device.location_id 
     LEFT JOIN 
-        plugin_rader_ratel_did ON plugin_rader_ratel_did.device_id=plugin_rader_ratel_device.id 
+        labtech.plugin_rader_ratel_did ON labtech.plugin_rader_ratel_did.device_id=labtech.plugin_rader_ratel_device.id 
     LEFT JOIN
-        plugin_rader_ratel_astdb ON plugin_rader_ratel_astdb.client_id=plugin_rader_ratel_device.client_id AND plugin_rader_ratel_astdb.astFamily='SIP' AND
-        plugin_rader_ratel_astdb.astKey=(CONCAT('Registry/',mac_address))
+        labtech.plugin_rader_ratel_astdb ON plugin_rader_ratel_astdb.client_id=labtech.plugin_rader_ratel_device.client_id AND labtech.plugin_rader_ratel_astdb.astFamily='SIP' AND
+        labtech.plugin_rader_ratel_astdb.astKey=(CONCAT('Registry/',mac_address))
     WHERE 
-        plugin_rader_ratel_device.client_id=$cwaClientId and plugin_rader_ratel_device.id=$deviceId
+        labtech.plugin_rader_ratel_device.client_id=$cwaClientId and labtech.plugin_rader_ratel_device.id=$deviceId
     GROUP BY 
         mac_address
     ORDER BY 
-        plugin_rader_ratel_device.extension_number
+        labtech.plugin_rader_ratel_device.extension_number
 " -AsDataTable
 } else {
     write-host "client id : $cwaClientId"
@@ -93,7 +93,7 @@ $table = Invoke-SqlQuery -Query "SELECT
     GROUP BY 
         mac_address
     ORDER BY 
-        plugin_rader_ratel_device.extension_number
+        labtech.plugin_rader_ratel_device.extension_number
 
 " -AsDataTable 
 }
