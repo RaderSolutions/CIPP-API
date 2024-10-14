@@ -47,6 +47,8 @@ function Get-LabtechClientId($TenantFilter) {
         
         try {
             $cwaResponse = Invoke-RestMethod -Uri "https://labtech.radersolutions.com/cwa/api/v1/clients?condition=externalid=$($clientId)" -Method 'GET' -Headers $cwaHeaders
+            write-host "CWA RESP"
+            write-host $cwaResponse
         }
         catch {
             if ($_.Exception.Response.StatusCode -eq [System.Net.HttpStatusCode]::Unauthorized) {
@@ -73,6 +75,8 @@ function Get-LabtechClientId($TenantFilter) {
         }
 
         $cwaClientId = $cwaResponse.id
+        write-host "CWA ID"
+        write-host $cwaClientId
 
         if ($cwaClientId -eq 291) {
             $cwaClientId = 1
