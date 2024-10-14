@@ -72,24 +72,24 @@ $table = Invoke-SqlQuery -Query "SELECT
         CONCAT(plugin_rader_ratel_product.manufacturer_name,' ',plugin_rader_ratel_product.model) AS Model, 
         GROUP_CONCAT(plugin_rader_ratel_did.number) AS 'DidNumber', 
         fop_group as 'FopGroup',
-        plugin_rader_ratel_device.is_hidden_in_phonebook AS 'HideFromPhonebook',
-        plugin_rader_ratel_device.is_sync_scheduled AS 'NeedsSync',
-        plugin_rader_ratel_device.last_sync AS 'LastSync', sip_password as 'SipPassword',
+        labtech.plugin_rader_ratel_device.is_hidden_in_phonebook AS 'HideFromPhonebook',
+        labtech.plugin_rader_ratel_device.is_sync_scheduled AS 'NeedsSync',
+        labtech.plugin_rader_ratel_device.last_sync AS 'LastSync', sip_password as 'SipPassword',
         SUBSTRING_INDEX(plugin_rader_ratel_astdb.astValue,':',1) AS 'IpAddress'
-    FROM plugin_rader_ratel_device 
+    FROM labtech.plugin_rader_ratel_device 
     LEFT JOIN 
-        plugin_rader_ratel_product ON plugin_rader_ratel_product.id=plugin_rader_ratel_device.product_id 
+        labtech.plugin_rader_ratel_product ON labtech.plugin_rader_ratel_product.id=labtech.plugin_rader_ratel_device.product_id 
     LEFT JOIN 
-        contacts ON contacts.contactid=plugin_rader_ratel_device.contact_id 
+        contacts ON contacts.contactid=labtech.plugin_rader_ratel_device.contact_id 
     LEFT JOIN 
-        locations ON locations.locationID=plugin_rader_ratel_device.location_id 
+        locations ON locations.locationID=labtech.plugin_rader_ratel_device.location_id 
     LEFT JOIN 
-        plugin_rader_ratel_did ON plugin_rader_ratel_did.device_id=plugin_rader_ratel_device.id 
+        labtech.plugin_rader_ratel_did ON labtech.plugin_rader_ratel_did.device_id=labtech.plugin_rader_ratel_device.id 
     LEFT JOIN
-        plugin_rader_ratel_astdb ON plugin_rader_ratel_astdb.client_id=plugin_rader_ratel_device.client_id AND plugin_rader_ratel_astdb.astFamily='SIP' AND
-        plugin_rader_ratel_astdb.astKey=(CONCAT('Registry/',mac_address))
+        labtech.plugin_rader_ratel_astdb ON labtech.plugin_rader_ratel_astdb.client_id=labtech.plugin_rader_ratel_device.client_id AND labtech.plugin_rader_ratel_astdb.astFamily='SIP' AND
+        labtech.plugin_rader_ratel_astdb.astKey=(CONCAT('Registry/',mac_address))
     WHERE 
-        plugin_rader_ratel_device.client_id=$cwaClientId
+        labtech.plugin_rader_ratel_device.client_id=$cwaClientId
     GROUP BY 
         mac_address
     ORDER BY 
