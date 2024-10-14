@@ -23,9 +23,11 @@ Import-Module SimplySql
 function Get-LabtechClientId($TenantFilter) {
     try {
         $headers = @{
-            "clientId"      = $ENV:CwmClientId
+            "clientId"      = "c545dcce-a20a-4440-9ade-3e89719a4a7c"
+            # "clientId"      = $ENV:CwmClientId
             "Content-Type"  = "application/json"
-            "Authorization" = $ENV:CwManage
+            # "Authorization" = $ENV:CwManage
+            "Authorization" = "Basic cmFkZXIrdFVJTDluMWpWVjNxUjdVdjphNUR2VTFmUGFWRXBteE9w"
         }
         $response = Invoke-RestMethod -Uri "https://api-na.myconnectwise.net/v4_6_release/apis/3.0/company/companies?conditions=userDefinedField10='$($TenantFilter)'&fields=id" -Method 'GET' -Headers $headers
         if ($response -is [array] -and $response.Count -gt 1) {
