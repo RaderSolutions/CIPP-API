@@ -23,11 +23,10 @@ Import-Module SimplySql
 function Get-LabtechClientId($TenantFilter) {
     try {
         $headers = @{
-            "clientId"      = "c545dcce-a20a-4440-9ade-3e89719a4a7c"
-            # "clientId"      = $ENV:CwmClientId
+            "clientId"      = $ENV:CwmClientId
             "Content-Type"  = "application/json"
-            # "Authorization" = $ENV:CwManage
-            "Authorization" = "Basic cmFkZXIrdFVJTDluMWpWVjNxUjdVdjphNUR2VTFmUGFWRXBteE9w"
+            "Authorization" = $ENV:CwManage
+           
         }
         $response = Invoke-RestMethod -Uri "https://api-na.myconnectwise.net/v4_6_release/apis/3.0/company/companies?conditions=userDefinedField10='$($TenantFilter)'&fields=id" -Method 'GET' -Headers $headers
         if ($response -is [array] -and $response.Count -gt 1) {
@@ -49,6 +48,9 @@ function Get-LabtechClientId($TenantFilter) {
             $cwaResponse = Invoke-RestMethod -Uri "https://labtech.radersolutions.com/cwa/api/v1/clients?condition=externalid=$($clientId)" -Method 'GET' -Headers $cwaHeaders
             write-host "CWA RESP"
             write-host $cwaResponse
+            Write-Host "Formatted CWA Response:"
+            Write-Host ($cwaResponse | ConvertTo-Json -Depth 10)
+
         }
         catch {
             if ($_.Exception.Response.StatusCode -eq [System.Net.HttpStatusCode]::Unauthorized) {
