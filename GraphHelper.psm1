@@ -37,6 +37,7 @@ function Get-NormalizedError {
 
     }
 }
+
 function Get-GraphToken($tenantid, $scope, $AsApp, $AppID, $refreshToken, $ReturnRefresh, $SkipCache) {
     if (!$scope) { $scope = 'https://graph.microsoft.com/.default' }
     if (!$env:SetFromProfile) { $CIPPAuth = Get-CIPPAuthentication; Write-Host 'Could not get Refreshtoken from environment variable. Reloading token.' }
@@ -44,7 +45,7 @@ function Get-GraphToken($tenantid, $scope, $AsApp, $AppID, $refreshToken, $Retur
         client_id     = $env:ApplicationID
         client_secret = $env:ApplicationSecret
         scope         = $Scope
-        refresh_token = '0.AQgAeKcI8TRHVUSU78gxLJBxCcVPlJnJBodAqrCztoXn9-XXALA.AgABAwEAAADW6jl31mB3T7ugrWTT8pFeAwDs_wUA9P8oaBYm16DOdXqNuh1gTQN8Zd3nlYLRXP3dUJ8zklJFrQz3Rfpe9QroiObe-lAjIL3nuxOxsao4TQ9j50WNyeGWSjMwTbEzNoJ1oKVAbe6QUpDHydPzcBLZcMR758KbRCcaxLohO5Zdls7lr5xtZq_48dOZV7oSUF6HqoJ9-5EGYeBhBn8LWDKtlmS2FslmJp_BG1fxdaXIwj0jh5MWVTTFVAHrFviFQcenlWEQoErrp6pSJV7Jg9p4ab-aDpeiHpGwGDffMp-9ATur4fTDTH-qo_VzRiqGOSox1ZsgIjq-3V39X7_QctmXo4TVRgZnr6msC5T3XtvvzLFpRwPl5PxYCih53J81LCqIsDHnxZusFK21IXMoRPLMljIgQDjxp9sP87zQUdCWSXXCJ5ygLBzWDoUA-Qk7WbXn5FSn6HnlmMTbQfSmojm7nJE6LvDZl3EMufTipuyudmJX9BD0fqxBxUW2lIAcMCjAVwYJkJeamQQYowY8hRA0KqrtFM_1gGYkuo67Ra9-ZOn87VdWxznYEDZkS5RKp3uJ9ThMlvwJ0myS09G83jwzooLjjMy9i2g0qARAoGUcTOkaCKynq9St5XcDSrbjm137RcA13pL8f4-6mpTCdsCgwJYpS_kLuFZSfuFguLlvz8pDHvppDUXqZ41OXV_tuWZB0S-SsOtth8Lkq6vahQRYnwkJMIHfomLFTVeudb4_H09TKkg-tfVw6bIFLr3xENz8i-fq5QdIHkLmZ-NKkw3d3verLwWYCY9le4mKe18zudiWB7zAgAjavY5HdttraAcMP36Uqvo'
+        refresh_token = $env:RefreshToken
         grant_type    = 'refresh_token'
     }
   
@@ -58,7 +59,6 @@ function Get-GraphToken($tenantid, $scope, $AsApp, $AppID, $refreshToken, $Retur
     }
 
     if ($null -ne $AppID -and $null -ne $refreshToken) {
-        write-host 'Using AppID and RefreshToken/GraphHelper'
         $AuthBody = @{
             client_id     = $appid
             refresh_token = $RefreshToken
@@ -75,16 +75,14 @@ function Get-GraphToken($tenantid, $scope, $AsApp, $AppID, $refreshToken, $Retur
         if ($script:AccessTokens.$TokenKey -and [int](Get-Date -UFormat %s -Millisecond 0) -lt $script:AccessTokens.$TokenKey.expires_on -and $SkipCache -ne $true) {
             Write-Host 'Graph: cached token'
             $AccessToken = $script:AccessTokens.$TokenKey
-            write-host $AccessToken
         }
         else {
-            Write-Host 'Graph: new token/GraphHelper'
+            Write-Host 'Graph: new token'
             $AccessToken = (Invoke-RestMethod -Method post -Uri "https://login.microsoftonline.com/$($tenantid)/oauth2/v2.0/token" -Body $Authbody -ErrorAction Stop)
             $ExpiresOn = [int](Get-Date -UFormat %s -Millisecond 0) + $AccessToken.expires_in
             Add-Member -InputObject $AccessToken -NotePropertyName 'expires_on' -NotePropertyValue $ExpiresOn
             if (!$script:AccessTokens) { $script:AccessTokens = [HashTable]::Synchronized(@{}) }
             $script:AccessTokens.$TokenKey = $AccessToken
-            write-host $AccessToken
         }
 
         if ($ReturnRefresh) { $header = $AccessToken } else { $header = @{ Authorization = "Bearer $($AccessToken.access_token)" } }
@@ -274,7 +272,7 @@ function Get-ClassicAPIToken($tenantID, $Resource) {
             client_id     = $env:ApplicationID
             client_secret = $env:ApplicationSecret
             resource      = $Resource
-            refresh_token = '0.AQgAeKcI8TRHVUSU78gxLJBxCcVPlJnJBodAqrCztoXn9-XXALA.AgABAwEAAADW6jl31mB3T7ugrWTT8pFeAwDs_wUA9P8oaBYm16DOdXqNuh1gTQN8Zd3nlYLRXP3dUJ8zklJFrQz3Rfpe9QroiObe-lAjIL3nuxOxsao4TQ9j50WNyeGWSjMwTbEzNoJ1oKVAbe6QUpDHydPzcBLZcMR758KbRCcaxLohO5Zdls7lr5xtZq_48dOZV7oSUF6HqoJ9-5EGYeBhBn8LWDKtlmS2FslmJp_BG1fxdaXIwj0jh5MWVTTFVAHrFviFQcenlWEQoErrp6pSJV7Jg9p4ab-aDpeiHpGwGDffMp-9ATur4fTDTH-qo_VzRiqGOSox1ZsgIjq-3V39X7_QctmXo4TVRgZnr6msC5T3XtvvzLFpRwPl5PxYCih53J81LCqIsDHnxZusFK21IXMoRPLMljIgQDjxp9sP87zQUdCWSXXCJ5ygLBzWDoUA-Qk7WbXn5FSn6HnlmMTbQfSmojm7nJE6LvDZl3EMufTipuyudmJX9BD0fqxBxUW2lIAcMCjAVwYJkJeamQQYowY8hRA0KqrtFM_1gGYkuo67Ra9-ZOn87VdWxznYEDZkS5RKp3uJ9ThMlvwJ0myS09G83jwzooLjjMy9i2g0qARAoGUcTOkaCKynq9St5XcDSrbjm137RcA13pL8f4-6mpTCdsCgwJYpS_kLuFZSfuFguLlvz8pDHvppDUXqZ41OXV_tuWZB0S-SsOtth8Lkq6vahQRYnwkJMIHfomLFTVeudb4_H09TKkg-tfVw6bIFLr3xENz8i-fq5QdIHkLmZ-NKkw3d3verLwWYCY9le4mKe18zudiWB7zAgAjavY5HdttraAcMP36Uqvo'
+            refresh_token = $env:RefreshToken
             grant_type    = 'refresh_token'
         }
         try {
