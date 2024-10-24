@@ -26,7 +26,7 @@ try {
     $cwaRefreshTokenHeaders.Add("Authorization", "Bearer $token")
     $cwaRefreshTokenHeaders.Add("ClientId", $ENV:CwaClientId)
     $cwaRefreshTokenHeaders.Add("Content-Type", "application/json")
-
+    $cwaRefreshTokenHeaders.Add("Cookie", "_rader_oauth2_proxy_csrf=0846153d18cfb7b6972f9f2b264af656")
     # Body for the refresh token request
     $tokenBody = "`"$token`""
 
@@ -46,6 +46,7 @@ catch {
     $cwaTokenHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $cwaTokenHeaders.Add("ClientId", $ENV:CwaClientId)
     $cwaTokenHeaders.Add("Content-Type", "application/json")
+    $cwaTokenHeaders.Add("Cookie", "_rader_oauth2_proxy_csrf=0846153d18cfb7b6972f9f2b264af656")
 
     # Logging the credentials (debugging purpose, remove or hide in production)
     Write-Host "USERNAME: $ENV:CwaUser"
