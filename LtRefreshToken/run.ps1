@@ -35,7 +35,6 @@ catch {
     $tokenBody = "{
             `n    `"UserName`":`"$($ENV:CwaUser)`",
             `n    `"Password`":`"$($ENV:CwaPass)`",
-            `n    `"TwoFactorPasscode`":`"Cod3`",
             `n}"
             
     $cwaToken = (Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken' -Method 'POST' -Headers $cwaTokenHeaders -Verbose -Body $tokenBody).AccessToken
