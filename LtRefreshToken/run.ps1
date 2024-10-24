@@ -20,7 +20,8 @@ try {
 
     # Retrieve the refresh token from Azure Key Vault
     $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
-
+    Write-Host "Retrieved the refresh token from Azure Key Vault."
+    write-host $token
     # Create headers for the refresh token request
     $cwaRefreshTokenHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $cwaRefreshTokenHeaders.Add("Authorization", "Bearer $token")
