@@ -58,7 +58,10 @@ catch {
             `n}"
 
     # Make the request to get a new token
-    $cwaToken = (Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken' -Method 'POST' -Headers $cwaTokenHeaders -Verbose -Body $tokenBody).AccessToken
+    $cwaTokenInitRespBody = (Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken' -Method 'POST' -Headers $cwaTokenHeaders -Verbose -Body $tokenBody)
+    write-host "CWA Token Init Resp Body"
+    write-host $cwaTokenInitRespBody | ConvertTo-Json -Depth 10
+
 
     # Convert the new AccessToken to SecureString and store it in Azure Key Vault
     $cwaTokenSecret = ConvertTo-SecureString $cwaToken -AsPlainText -Force
