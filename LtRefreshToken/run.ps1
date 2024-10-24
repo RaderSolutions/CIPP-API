@@ -1,49 +1,68 @@
 # Input bindings are passed in via param block.
 param($Timer)
 $global:erroractionpreference = 1
+
 # Get the current universal time in the default string format
 $currentUTCtime = (Get-Date).ToUniversalTime()
 
-# The 'IsPastDue' porperty is 'true' when the current function invocation is later than scheduled.
+# Check if the Timer is past due
 if ($Timer.IsPastDue) {
     Write-Host "PowerShell timer is running late!"
 }
 
-# Write an information log with the current time.
+# Log the current UTC time
 Write-Host "PowerShell timer trigger function ran! TIME: $currentUTCtime"
-# Refresh Automate Auth Token\
+
+# Refresh Automate Auth Token
 try { 
+    # Connect to Azure using Managed Identity
     $null = Connect-AzAccount -Identity
+
+    # Retrieve the refresh token from Azure Key Vault
     $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
+
+    # Create headers for the refresh token request
     $cwaRefreshTokenHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $cwaRefreshTokenHeaders.Add("Authorization", "Bearer $token")
     $cwaRefreshTokenHeaders.Add("ClientId", $ENV:CwaClientId)
     $cwaRefreshTokenHeaders.Add("Content-Type", "application/json")
+
+    # Body for the refresh token request
     $tokenBody = "`"$token`""
-    
+
+    # Make the request to refresh the token
     $cwaToken = Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken/refresh' -Method 'POST' -Headers $cwaRefreshTokenHeaders -Verbose -Body $tokenBody
+
+    # Convert the refreshed AccessToken to a SecureString and store it in Azure Key Vault
     $cwaTokenSecret = ConvertTo-SecureString $cwaToken.AccessToken -AsPlainText -Force
     Set-AzKeyVaultSecret -VaultName "cipphglzr" -Name "cwaRefreshToken" -SecretValue $cwaTokenSecret -ContentType "text/plain"
+
+    Write-Host "Successfully refreshed the token and stored in Azure Key Vault."
 }
 catch { 
-    Write-Output $_.Exception
-    # Get new Automate Auth Token
+    Write-Host "Error refreshing token, attempting to get a new one: $($_.Exception.Message)"
+    
+    # Get new Automate Auth Token (fallback if refresh fails)
     $cwaTokenHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $cwaTokenHeaders.Add("ClientId", $ENV:CwaClientId)
     $cwaTokenHeaders.Add("Content-Type", "application/json")
-            write-host "USERNAME"
-            write-host $ENV:CwaUser
-            write-host "PASSWORD"
-            write-host $ENV:CwaPass
 
+    # Logging the credentials (debugging purpose, remove or hide in production)
+    Write-Host "USERNAME: $ENV:CwaUser"
+    Write-Host "PASSWORD: $ENV:CwaPass"
+
+    # Construct the body for the new token request
     $tokenBody = "{
-            `n    `"UserName`":`"$($ENV:CwaUser)`",
-            `n    `"Password`":`"$($ENV:CwaPass)`",
+            `n    `"UserName`": `"$($ENV:CwaUser)`",
+            `n    `"Password`": `"$($ENV:CwaPass)`"
             `n}"
-            
+
+    # Make the request to get a new token
     $cwaToken = (Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken' -Method 'POST' -Headers $cwaTokenHeaders -Verbose -Body $tokenBody).AccessToken
+
+    # Convert the new AccessToken to SecureString and store it in Azure Key Vault
     $cwaTokenSecret = ConvertTo-SecureString $cwaToken -AsPlainText -Force
     Set-AzKeyVaultSecret -VaultName "cipphglzr" -Name "cwaRefreshToken" -SecretValue $cwaTokenSecret -ContentType "text/plain"
+
+    Write-Host "Successfully obtained a new token and stored in Azure Key Vault."
 }
-
-
