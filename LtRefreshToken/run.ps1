@@ -31,7 +31,11 @@ catch {
     $cwaTokenHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $cwaTokenHeaders.Add("ClientId", $ENV:CwaClientId)
     $cwaTokenHeaders.Add("Content-Type", "application/json")
-            
+            write-host "USERNAME"
+            write-host $ENV:CwaUser
+            write-host "PASSWORD"
+            write-host $ENV:CwaPass
+
     $tokenBody = "{
             `n    `"UserName`":`"$($ENV:CwaUser)`",
             `n    `"Password`":`"$($ENV:CwaPass)`",
