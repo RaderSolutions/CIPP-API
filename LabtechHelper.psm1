@@ -46,6 +46,8 @@ function Get-LabtechClientId($TenantFilter) {
         
         try {
             $cwaResponse = Invoke-RestMethod -Uri "https://labtech.radersolutions.com/cwa/api/v1/clients?condition=externalid=$($clientId)" -Method 'GET' -Headers $cwaHeaders
+            write-host "token"
+            write-host $token
             write-host "CWA RESP"
             write-host $cwaResponse
             Write-Host "Formatted CWA Response:"
