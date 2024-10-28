@@ -25,6 +25,8 @@ try {
     # Create headers for the refresh token request
     $cwaRefreshTokenHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $cwaRefreshTokenHeaders.Add("Authorization", "Bearer $token")
+    write-host "Client ID"
+    write-host $ENV:CwaClientId
     $cwaRefreshTokenHeaders.Add("ClientId", $ENV:CwaClientId)
     $cwaRefreshTokenHeaders.Add("Content-Type", "application/json")
     $cwaRefreshTokenHeaders.Add("Cookie", "_rader_oauth2_proxy_csrf=0846153d18cfb7b6972f9f2b264af656")
