@@ -46,6 +46,8 @@ catch {
     # Get new Automate Auth Token (fallback if refresh fails)
     $cwaTokenHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $cwaTokenHeaders.Add("ClientId", $ENV:CwaClientId)
+    write-host "Client ID"
+    write-host $ENV:CwaClientId
     $cwaTokenHeaders.Add("Content-Type", "application/json")
     $cwaTokenHeaders.Add("Cookie", "_rader_oauth2_proxy_csrf=0846153d18cfb7b6972f9f2b264af656")
 
