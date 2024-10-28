@@ -29,7 +29,7 @@ try {
     write-host $ENV:CwaClientId
     $cwaRefreshTokenHeaders.Add("ClientId", $ENV:CwaClientId)
     $cwaRefreshTokenHeaders.Add("Content-Type", "application/json")
-    $cwaRefreshTokenHeaders.Add("Cookie", "_rader_oauth2_proxy_csrf=0846153d18cfb7b6972f9f2b264af656")
+    # $cwaRefreshTokenHeaders.Add("Cookie", "_rader_oauth2_proxy_csrf=0846153d18cfb7b6972f9f2b264af656")
     # Body for the refresh token request
     $tokenBody = "`"$token`""
 
@@ -51,7 +51,7 @@ catch {
     write-host "Client ID"
     write-host $ENV:CwaClientId
     $cwaTokenHeaders.Add("Content-Type", "application/json")
-    $cwaTokenHeaders.Add("Cookie", "_rader_oauth2_proxy_csrf=0846153d18cfb7b6972f9f2b264af656")
+    # $cwaTokenHeaders.Add("Cookie", "_rader_oauth2_proxy_csrf=0846153d18cfb7b6972f9f2b264af656")
 
     # Logging the credentials (debugging purpose, remove or hide in production)
     Write-Host "USERNAME: $ENV:CwaUser"
