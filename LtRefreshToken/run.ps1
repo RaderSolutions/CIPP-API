@@ -61,7 +61,8 @@ catch {
     # Construct the body for the new token request
     $tokenBody = "{
             `n    `"UserName`": `"$($ENV:CwaUser)`",
-            `n    `"Password`": `"$($ENV:CwaPass)`"
+            `n    `"Password`": `"$($ENV:CwaPass)`",
+            `n    `"TwoFactorPasscode`": `"Cod3`"
             `n}"
 
     # Make the request to get a new token
