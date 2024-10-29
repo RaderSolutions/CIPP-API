@@ -24,7 +24,7 @@ try {
     write-host $token
     # Create headers for the refresh token request
     $cwaRefreshTokenHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-    $cwaRefreshTokenHeaders.Add("Authorization", "Bearer $token")
+    # $cwaRefreshTokenHeaders.Add("Authorization", "Bearer $token")
     write-host "Client ID"
     write-host $ENV:CwaClientId
     $cwaRefreshTokenHeaders.Add("ClientId", $ENV:CwaClientId)
@@ -35,7 +35,7 @@ try {
     write-host "TOKEN BODY"
     write-host $tokenBody
     # Make the request to refresh the token
-    $cwaToken = Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken/refresh' -Method 'POST' -Headers $cwaRefreshTokenHeaders -Verbose -Body $tokenBody
+    $cwaToken = Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken/refresh' -Method 'POST' -Headers $cwaRefreshTokenHeaders -Verbose -Body $token
 
     # Convert the refreshed AccessToken to a SecureString and store it in Azure Key Vault
     $cwaTokenSecret = ConvertTo-SecureString $cwaToken.AccessToken -AsPlainText -Force
