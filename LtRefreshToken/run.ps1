@@ -22,6 +22,8 @@ try {
     $tokenBody = "`"$token`""
     
     $cwaToken = Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken/refresh' -Method 'POST' -Headers $cwaRefreshTokenHeaders -Verbose -Body $tokenBody
+    Write-Host "TRY BLOCK/CWA TOKEN RESPONSE"
+    Write-Host $cwaToken
     $cwaTokenSecret = ConvertTo-SecureString $cwaToken.AccessToken -AsPlainText -Force
     Set-AzKeyVaultSecret -VaultName "cipphglzr" -Name "cwaRefreshToken" -SecretValue $cwaTokenSecret -ContentType "text/plain"
 }
