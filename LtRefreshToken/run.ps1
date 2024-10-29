@@ -32,7 +32,8 @@ try {
     # $cwaRefreshTokenHeaders.Add("Cookie", "_rader_oauth2_proxy_csrf=0846153d18cfb7b6972f9f2b264af656")
     # Body for the refresh token request
     $tokenBody = "`"$token`""
-
+    write-host "TOKEN BODY"
+    write-host $tokenBody
     # Make the request to refresh the token
     $cwaToken = Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken/refresh' -Method 'POST' -Headers $cwaRefreshTokenHeaders -Verbose -Body $tokenBody
 
