@@ -16,7 +16,7 @@ try {
     $null = Connect-AzAccount -Identity
     $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
     $cwaRefreshTokenHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-    $cwaRefreshTokenHeaders.Add("Authorization", "Bearer $token")
+    # $cwaRefreshTokenHeaders.Add("Authorization", "Bearer $token")
     $cwaRefreshTokenHeaders.Add("ClientId", $ENV:CwaClientId)
     $cwaRefreshTokenHeaders.Add("Content-Type", "application/json")
     $tokenBody = "`"$token`""
