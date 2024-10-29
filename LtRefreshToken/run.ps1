@@ -19,8 +19,10 @@ try {
     # $cwaRefreshTokenHeaders.Add("Authorization", "Bearer $token")
     $cwaRefreshTokenHeaders.Add("ClientId", $ENV:CwaClientId)
     $cwaRefreshTokenHeaders.Add("Content-Type", "application/json")
-    $tokenBody = "`"$token`""
-    
+    # $tokenBody = "`"$token`""
+    $tokenBody = @"
+    `"$token`"
+"@
     $cwaToken = Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken/refresh' -Method 'POST' -Headers $cwaRefreshTokenHeaders -Verbose -Body $tokenBody
     Write-Host "TRY BLOCK/CWA TOKEN RESPONSE"
     Write-Host $cwaToken
@@ -34,10 +36,13 @@ catch {
     $cwaTokenHeaders.Add("ClientId", $ENV:CwaClientId)
     $cwaTokenHeaders.Add("Content-Type", "application/json")
             
-    $tokenBody = "{
-            `n    `"UserName`":`"$($ENV:CwaUser)`",
-            `n    `"Password`":`"$($ENV:CwaPass)`"
-            `n}"
+    $tokenBody = @"
+{
+    `"UserName`": `"cwarest`",
+    `"Password`": `"Morel17AbasedTentier!`",
+    `"TwoFactorPasscode`": `"Cod3`"
+}
+"@
             
     $cwaToken = (Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken' -Method 'POST' -Headers $cwaTokenHeaders -Verbose -Body $tokenBody).AccessToken
     $cwaTokenSecret = ConvertTo-SecureString $cwaToken -AsPlainText -Force
