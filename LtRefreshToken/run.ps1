@@ -35,7 +35,7 @@ try {
     write-host "TOKEN BODY"
     write-host $tokenBody
     # Make the request to refresh the token
-    $cwaToken = Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken/refresh' -Method 'POST' -Headers $cwaRefreshTokenHeaders -Verbose -Body $tokenBody
+    $cwaToken = Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken/refresh' -Method 'POST' -Headers $cwaRefreshTokenHeaders -Verbose -Body $token
     write-host "CWA Token"
     write-host $cwaToken | ConvertTo-Json -Depth 10
     # Convert the refreshed AccessToken to a SecureString and store it in Azure Key Vault
