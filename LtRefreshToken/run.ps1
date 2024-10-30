@@ -43,7 +43,8 @@ catch {
 {
     `"UserName`": `"cwarest`",
     `"Password`": `"Morel17AbasedTentier!`",
-    `"TwoFactorPasscode`": `"Cod3`"
+    `"TwoFactorPasscode`": `"Cod3`",
+    `"IsTwoFactorRequired`": `false`
 }
 "@
             
