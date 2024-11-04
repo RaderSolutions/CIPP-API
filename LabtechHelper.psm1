@@ -22,6 +22,10 @@ Import-Module SimplySql
 # }
 function Get-LabtechClientId($TenantFilter) {
     try {
+        write-host "CwmClientId"
+        write-host $ENV:CwmClientId
+        write-host "CwManage"
+        write-host $ENV:CwManage
         $headers = @{
             "clientId"      = $ENV:CwmClientId
             "Content-Type"  = "application/json"
