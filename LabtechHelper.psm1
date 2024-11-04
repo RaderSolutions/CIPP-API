@@ -45,6 +45,7 @@ function Get-LabtechClientId($TenantFilter) {
         write-host "token/LabtechHelper/cwaRefreshToken"
         write-host "cwaClientId"
         write-host $ENV:CwaClientId
+        write-host "token/LabtechHelper/cwaRefreshToken"
         write-host $token
         $cwaHeaders = @{
             "Authorization" = "Bearer $token"
