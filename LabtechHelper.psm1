@@ -24,45 +24,54 @@ Import-Module SimplySql
 # Sample JSON data
 
 # Function to find an entry by Name and return cw_automate_client_id
-function Get-ClientIdByName {
+# Revised Get-ClientIdByTenantId Function (previously Get-ClientIdByName)
+function Get-ClientIdByTenantId {
+    param (
+        [string]$tenantId  # Accepts the tenant ID to search for
+    )
+    
+    # Assuming $env:CompaniesArray is a JSON string passed into the environment
     $jsonData = $env:CompaniesArray
 
+    # Convert the JSON to an array of PowerShell objects
     $data = $jsonData | ConvertFrom-Json
     
+    # Create an array to hold selected hash table entries
     $hashTableData = @()
     foreach ($item in $data) {
         $hashTableData += @{
-            Name = $item.Name
-            Domain = $item.Domain
-            cw_automate_client_id = $item.cw_automate_client_id
-            cw_manage_company_id = $item.cw_manage_company_id
+            Name                       = $item.Name
+            Domain                     = $item.Domain
+            cw_automate_client_id      = $item.cw_automate_client_id
+            cw_manage_company_id       = $item.cw_manage_company_id
+            tenant_id                  = $item.tenant_id  # Assuming tenant_id exists in the JSON data
         }
     }
-    
-    param (
-        [string]$name
-    )
-    $matchedEntry = $hashTableData | Where-Object { $_.tenant_id -eq $name }
+
+    # Search the hashTableData for a matching entry based on 'tenant_id'
+    $matchedEntry = $hashTableData | Where-Object { $_.tenant_id -eq $tenantId }
 
     if ($matchedEntry) {
-        return $matchedEntry.cw_manage_client_id
+        return $matchedEntry.cw_manage_company_id  # Return the cw_manage_company_id associated with tenant_id
     } else {
-        Write-Output "No entry found with the name '$name'."
+        Write-Output "No entry found with the tenant ID '$tenantId'."
         return $null
     }
 }
-# REVISE
-function Get-LabtechClientId($TenantFilter) {
-    try {
-        write-host "CwmClientId"
-        write-host $ENV:CwmClientId
-        write-host "CwManage"
-        write-host $ENV:CwManage
 
-        # Get client ID from JSON data
-        $clientId = Get-ClientIdByName -name $TenantFilter
+# Revised Get-LabtechClientId Function
+function Get-LabtechClientId {
+    param (
+        [string]$TenantFilter  # Tenant ID to filter and search the associated client ID
+    )
+    try {
+        Write-Host "CwmClientId: $ENV:CwmClientId"
+        Write-Host "CwManage: $ENV:CwManage"
+
+        # Get client ID from JSON data via Get-ClientIdByTenantId
+        $clientId = Get-ClientIdByTenantId -tenantId $TenantFilter
         if (-not $clientId) {
-            Write-Error "Client ID not found for name: $TenantFilter"
+            Write-Error "Client ID not found for tenant ID: $TenantFilter"
             return $null
         }
         
@@ -81,14 +90,16 @@ function Get-LabtechClientId($TenantFilter) {
             Write-Host ($cwaResponse | ConvertTo-Json -Depth 10)
         }
         catch {
+            # Handle Unauthorized error and refresh the token
             if ($_.Exception.Response.StatusCode -eq [System.Net.HttpStatusCode]::Unauthorized) {
-                # Refresh the token
+                Write-Host "Refreshing Token..."
                 $null = Connect-AzAccount -Identity
                 $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
-                $cwaRefreshTokenHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-                $cwaRefreshTokenHeaders.Add("Authorization", "Bearer $token")
-                $cwaRefreshTokenHeaders.Add("ClientId", $ENV:CwaClientId)
-                $cwaRefreshTokenHeaders.Add("Content-Type", "application/json")
+                $cwaRefreshTokenHeaders = @{
+                    "Authorization" = "Bearer $token"
+                    "ClientId"      = $ENV:CwaClientId
+                    "Content-Type"  = "application/json"
+                }
                 $tokenBody = "`"$token`""
                 
                 $cwaToken = Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken/refresh' -Method 'POST' -Headers $cwaRefreshTokenHeaders -Verbose -Body $tokenBody
@@ -107,7 +118,7 @@ function Get-LabtechClientId($TenantFilter) {
         $cwaClientId = $cwaResponse.id
         Write-Host "CWA ID: $cwaClientId"
 
-        # Special handling for ID 291
+        # Special handling for specific Client ID (e.g., 291)
         if ($cwaClientId -eq 291) {
             $cwaClientId = 1
         }
@@ -118,6 +129,7 @@ function Get-LabtechClientId($TenantFilter) {
         return $null
     }
 }
+
 
 # ORIGINAL
 # function Get-LabtechClientId($TenantFilter) {
