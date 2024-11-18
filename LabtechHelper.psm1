@@ -58,78 +58,121 @@ function Get-ClientIdByTenantId {
         return $null
     }
 }
-
-# Revised Get-LabtechClientId Function
+# Revised Get-LabtechServerId Function/LOCAL
 function Get-LabtechClientId {
     param (
         [string]$TenantFilter  # Tenant ID to filter and search the associated client ID
     )
     try {
-        Write-Host "CwmClientId: $ENV:CwmClientId"
-        Write-Host "CwManage: $ENV:CwManage"
+        # Retrieve CompaniesArray JSON from environment variable
+        $jsonData = $env:CompaniesArray
 
-        # Get client ID from JSON data via Get-ClientIdByTenantId
-        $clientId = Get-ClientIdByTenantId -tenantId $TenantFilter
-        if (-not $clientId) {
-            Write-Error "Client ID not found for tenant ID: $TenantFilter"
+        if (-not $jsonData) {
+            Write-Error "Environment variable 'CompaniesArray' is not set or is empty."
             return $null
         }
-        write-host "Customer/Client ID: $clientId"
-        # Fetch token for the Automate API call
-        $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
-        write-host "Token/LabtechHelper/cwaRefreshToken: $token"
-        $cwaHeaders = @{
-            "Authorization" = "Bearer $token"
-            "ClientId"      = $ENV:CwaClientId
-            "Content-Type"  = "application/json"
-        }
 
-        try {
-            # Make the Automate API call with the retrieved client ID
-            $cwaResponse = Invoke-RestMethod -Uri "https://labtech.radersolutions.com/cwa/api/v1/clients?condition=externalid=$($clientId)" -Method 'GET' -Headers $cwaHeaders
-            Write-Host "Formatted CWA Response:"
-            Write-Host ($cwaResponse | ConvertTo-Json -Depth 10)
-        }
-        catch {
-            # Handle Unauthorized error and refresh the token
-            if ($_.Exception.Response.StatusCode -eq [System.Net.HttpStatusCode]::Unauthorized) {
-                Write-Host "Refreshing Token..."
-                $null = Connect-AzAccount -Identity
-                $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
-                $cwaRefreshTokenHeaders = @{
-                    "Authorization" = "Bearer $token"
-                    "ClientId"      = $ENV:CwaClientId
-                    "Content-Type"  = "application/json"
-                }
-                $tokenBody = "`"$token`""
-                
-                $cwaToken = Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken/refresh' -Method 'POST' -Headers $cwaRefreshTokenHeaders -Verbose -Body $tokenBody
-                $cwaTokenSecret = ConvertTo-SecureString $cwaToken.AccessToken -AsPlainText -Force
-                Set-AzKeyVaultSecret -VaultName "cipphglzr" -Name "cwaRefreshToken" -SecretValue $cwaTokenSecret -ContentType "text/plain"
-                
-                # Retry the request with the new token
-                $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
-                $cwaHeaders["Authorization"] = "Bearer $token"
-                $cwaResponse = Invoke-RestMethod -Uri "https://labtech.radersolutions.com/cwa/api/v1/clients?condition=externalid=$($clientId)" -Method 'GET' -Headers $cwaHeaders
-            } else {
-                throw $_
+        # Convert the JSON to an array of PowerShell objects
+        $data = $jsonData | ConvertFrom-Json
+
+        # Search for the entry matching the provided Tenant ID
+        $matchedEntry = $data | Where-Object { $_.tenant_id -eq $TenantFilter }
+
+        if ($matchedEntry) {
+            # Retrieve the cw_automate_client_id for the matching entry
+            $cwaClientId = $matchedEntry.cw_automate_client_id
+
+            Write-Host "CWA Automate Client ID: $cwaClientId"
+
+            # Handle special cases (e.g., Client ID 291)
+            if ($cwaClientId -eq 291) {
+                $cwaClientId = 1
             }
-        }
 
-        $cwaClientId = $cwaResponse.id
-        Write-Host "CWA ID: $cwaClientId"
-
-        # Special handling for specific Client ID (e.g., 291)
-        if ($cwaClientId -eq 291) {
-            $cwaClientId = 1
+            return $cwaClientId
+        } else {
+            Write-Error "No entry found for Tenant ID: $TenantFilter."
+            return $null
         }
-        return $cwaClientId
     }
     catch {
         Write-Error "Error in Get-LabtechClientId: $_"
         return $null
     }
 }
+
+# # Revised Get-LabtechClientId Function
+# function Get-LabtechClientId {
+#     param (
+#         [string]$TenantFilter  # Tenant ID to filter and search the associated client ID
+#     )
+#     try {
+#         Write-Host "CwmClientId: $ENV:CwmClientId"
+#         Write-Host "CwManage: $ENV:CwManage"
+
+#         # Get client ID from JSON data via Get-ClientIdByTenantId
+#         $clientId = Get-ClientIdByTenantId -tenantId $TenantFilter
+#         if (-not $clientId) {
+#             Write-Error "Client ID not found for tenant ID: $TenantFilter"
+#             return $null
+#         }
+#         write-host "Customer/Client ID: $clientId"
+#         # Fetch token for the Automate API call
+#         $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
+#         write-host "Token/LabtechHelper/cwaRefreshToken: $token"
+#         $cwaHeaders = @{
+#             "Authorization" = "Bearer $token"
+#             "ClientId"      = $ENV:CwaClientId
+#             "Content-Type"  = "application/json"
+#         }
+
+#         try {
+#             # Make the Automate API call with the retrieved client ID
+#             $cwaResponse = Invoke-RestMethod -Uri "https://labtech.radersolutions.com/cwa/api/v1/clients?condition=externalid=$($clientId)" -Method 'GET' -Headers $cwaHeaders
+#             Write-Host "Formatted CWA Response:"
+#             Write-Host ($cwaResponse | ConvertTo-Json -Depth 10)
+#         }
+#         catch {
+#             # Handle Unauthorized error and refresh the token
+#             if ($_.Exception.Response.StatusCode -eq [System.Net.HttpStatusCode]::Unauthorized) {
+#                 Write-Host "Refreshing Token..."
+#                 $null = Connect-AzAccount -Identity
+#                 $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
+#                 $cwaRefreshTokenHeaders = @{
+#                     "Authorization" = "Bearer $token"
+#                     "ClientId"      = $ENV:CwaClientId
+#                     "Content-Type"  = "application/json"
+#                 }
+#                 $tokenBody = "`"$token`""
+                
+#                 $cwaToken = Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken/refresh' -Method 'POST' -Headers $cwaRefreshTokenHeaders -Verbose -Body $tokenBody
+#                 $cwaTokenSecret = ConvertTo-SecureString $cwaToken.AccessToken -AsPlainText -Force
+#                 Set-AzKeyVaultSecret -VaultName "cipphglzr" -Name "cwaRefreshToken" -SecretValue $cwaTokenSecret -ContentType "text/plain"
+                
+#                 # Retry the request with the new token
+#                 $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
+#                 $cwaHeaders["Authorization"] = "Bearer $token"
+#                 $cwaResponse = Invoke-RestMethod -Uri "https://labtech.radersolutions.com/cwa/api/v1/clients?condition=externalid=$($clientId)" -Method 'GET' -Headers $cwaHeaders
+#             } else {
+#                 throw $_
+#             }
+#         }
+
+#         $cwaClientId = $cwaResponse.id
+#         Write-Host "CWA ID: $cwaClientId"
+
+#         # Special handling for specific Client ID (e.g., 291)
+#         if ($cwaClientId -eq 291) {
+#             $cwaClientId = 1
+#         }
+#         return $cwaClientId
+#     }
+#     catch {
+#         Write-Error "Error in Get-LabtechClientId: $_"
+#         return $null
+#     }
+# }
+
 
 
 # ORIGINAL
