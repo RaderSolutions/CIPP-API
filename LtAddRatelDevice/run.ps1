@@ -137,6 +137,8 @@ try {
     $cwaHeaders.Add("Content-Type", "application/json")
     $scriptResult = (Invoke-RestMethod "https://labtech.radersolutions.com/cwa/api/v1/batch/scriptSchedule" -Method 'POST' -Headers $cwaHeaders -Body $scriptBody -Verbose) | ConvertTo-Json
     $results.add("Device data entered into database")
+    write-host 'script result:'
+    write-host $scriptResult
     $body = @{"Results" = @($results) }
 } 
 catch { 
