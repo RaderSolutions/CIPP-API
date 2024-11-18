@@ -74,9 +74,10 @@ function Get-LabtechClientId {
             Write-Error "Client ID not found for tenant ID: $TenantFilter"
             return $null
         }
-        
+        write-host "Customer/Client ID: $clientId"
         # Fetch token for the Automate API call
         $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
+        write-host "Token/LabtechHelper/cwaRefreshToken: $token"
         $cwaHeaders = @{
             "Authorization" = "Bearer $token"
             "ClientId"      = $ENV:CwaClientId
