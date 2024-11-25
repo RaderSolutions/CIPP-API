@@ -16,19 +16,12 @@ try {
     $null = Connect-AzAccount -Identity
     $token = Get-AzKeyVaultSecret -VaultName 'cipphglzr' -Name 'cwaRefreshToken' -AsPlainText
     $cwaRefreshTokenHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-    # $cwaRefreshTokenHeaders.Add("Authorization", "Bearer $token")
-    $cwaRefreshTokenHeaders.Add("ClientId", "9efbb42f-790f-47f7-8d6b-58a9d1e70639")
+    $cwaRefreshTokenHeaders.Add("Authorization", "Bearer $token")
+    $cwaRefreshTokenHeaders.Add("ClientId", $ENV:CwaClientId)
     $cwaRefreshTokenHeaders.Add("Content-Type", "application/json")
-    # $tokenBody = "`"$token`""
-    $tokenBody = @"
-    `"$token`"
-"@
+    $tokenBody = "`"$token`""
+    
     $cwaToken = Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken/refresh' -Method 'POST' -Headers $cwaRefreshTokenHeaders -Verbose -Body $tokenBody
-    Write-Host "TRY BLOCK/CWA TOKEN RESPONSE"
-    Write-Host $cwaToken
-    if ($cwaToken -is [string] -and $cwaToken.StartsWith("<!-- Copyright")) {
-        throw "Received HTML response instead of JSON. Attempting to get new API token."
-    }
     $cwaTokenSecret = ConvertTo-SecureString $cwaToken.AccessToken -AsPlainText -Force
     Set-AzKeyVaultSecret -VaultName "cipphglzr" -Name "cwaRefreshToken" -SecretValue $cwaTokenSecret -ContentType "text/plain"
 }
@@ -36,17 +29,13 @@ catch {
     Write-Output $_.Exception
     # Get new Automate Auth Token
     $cwaTokenHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-    $cwaTokenHeaders.Add("ClientId", "9efbb42f-790f-47f7-8d6b-58a9d1e70639")
+    $cwaTokenHeaders.Add("ClientId", $ENV:CwaClientId)
     $cwaTokenHeaders.Add("Content-Type", "application/json")
             
-    $tokenBody = @"
-{
-    `"UserName`": `"cwarest`",
-    `"Password`": `"Morel17AbasedTentier!`",
-    `"TwoFactorPasscode`": `"Cod3`",
-    `"IsTwoFactorRequired`": `false`
-}
-"@
+    $tokenBody = "{
+            `n    `"UserName`":`"$($ENV:CwaUser)`",
+            `n    `"Password`":`"$($ENV:CwaPass)`"
+            `n}"
             
     $cwaToken = (Invoke-RestMethod 'https://labtech.radersolutions.com/cwa/api/v1/apitoken' -Method 'POST' -Headers $cwaTokenHeaders -Verbose -Body $tokenBody).AccessToken
     $cwaTokenSecret = ConvertTo-SecureString $cwaToken -AsPlainText -Force
